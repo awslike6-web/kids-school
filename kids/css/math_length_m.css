@@ -1,0 +1,448 @@
+/* 2-2 길이 재기(m·cm) 탐험관: 하늘·노랑 테마 + 막대·줄자·돋보기·깃발·리본·길이 표·안내표 (docs/math_2-2_length_spec.md §3~§4) */
+body.mx-theme-lenm {
+  --mx-head-a: #e0f2fe;
+  --mx-head-b: #fef3c7;
+  --mx-line: #7dd3fc;
+  --mx-strong: #0c4a6e;
+  --mx-sub: #b45309;
+  --mx-accent: #0284c7;
+  --mx-accent-dark: #0369a1;
+  --mx-soft: #e0f2fe;
+  --mx-softer: #f0f9ff;
+  --ln-stick-bg: #fde047;
+  --ln-stick-line: #ca8a04;
+  --ln-stick-ink: #713f12;
+  --ln-merged-bg: #38bdf8;
+  --ln-merged-line: #0369a1;
+  --ln-merged-ink: #ffffff;
+  --ln-tape-bg: #fffbeb;
+  --ln-tape-line: #94a3b8;
+  --ln-tick: #334155;
+  --ln-obj-bg: #38bdf8;
+  --ln-zoom-bg: #ffffff;
+  --ln-zoom-line: #f59e0b;
+  --ln-zoom-box: rgba(250, 204, 21, 0.35);
+  --ln-pointer: #d97706;
+  --ln-ribbon-bg: #f472b6;
+  --ln-ribbon-line: #db2777;
+  --ln-pin-bg: #ffffff;
+  --ln-fact-bg: #fef9c3;
+  --ln-fact-line: #facc15;
+  --ln-fact-ink: #713f12;
+}
+
+/* 공통 그림 상자: 폭 100%(최대 340px), 높이 130px 이내 */
+.ln-box {
+  width: 100%;
+  max-width: 340px;
+  max-height: 130px;
+  margin: 8px auto;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 2px solid var(--mx-line, #7dd3fc);
+  background: var(--mx-softer, #f0f9ff);
+  overflow: hidden;
+}
+
+/* 1관: 10cm 막대 & 1m 합쳐진 띠 */
+.ln-sticks-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ln-legend {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mx-strong, #0c4a6e);
+}
+
+.ln-sum {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--mx-sub, #b45309);
+  white-space: nowrap;
+}
+
+.ln-sticks-track {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  height: 44px;
+  padding: 2px 0;
+  box-sizing: border-box;
+}
+
+.ln-stick {
+  flex: 0 0 auto;
+  width: calc((100% - 24px) / 10);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 2px solid var(--ln-stick-line, #ca8a04);
+  background: var(--ln-stick-bg, #fde047);
+  color: var(--ln-stick-ink, #713f12);
+  font-size: 13px;
+  font-weight: 800;
+  user-select: none;
+}
+
+.ln-stick.is-gap {
+  margin-left: 6px;
+}
+
+.ln-sticks-track.is-merging .ln-stick {
+  animation: lnMerge 0.8s ease forwards;
+}
+
+.ln-merged {
+  width: 100%;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 2px solid var(--ln-merged-line, #0369a1);
+  background: var(--ln-merged-bg, #38bdf8);
+  color: var(--ln-merged-ink, #ffffff);
+  font-size: 16px;
+  font-weight: 800;
+  user-select: none;
+}
+
+.ln-merged.is-pop {
+  animation: lnPop 0.3s ease;
+}
+
+/* 2관·5관·6관: 전체 줄자 & 돋보기 띠 */
+.ln-tape-wrap {
+  width: 100%;
+}
+
+.ln-tape-stage,
+.ln-zoom-stage {
+  position: relative;
+  width: 100%;
+  padding: 0 18px;
+  box-sizing: border-box;
+}
+
+.ln-tape-track,
+.ln-zoom-track {
+  position: relative;
+  width: 100%;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid var(--ln-tape-line, #94a3b8);
+  background: var(--ln-tape-bg, #fffbeb);
+  overflow: hidden;
+}
+
+.ln-obj-bar,
+.ln-zoom-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--ln-obj-bg, #38bdf8);
+  opacity: 0.45;
+}
+
+.ln-zoom-box {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  box-sizing: border-box;
+  border: 2px solid var(--ln-zoom-line, #f59e0b);
+  background: var(--ln-zoom-box, rgba(250, 204, 21, 0.35));
+}
+
+.ln-tick {
+  position: absolute;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--ln-tick, #334155);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.ln-tick-minor { height: 7px; }
+.ln-tick-mid { height: 12px; width: 2px; }
+.ln-tick-major { height: 17px; width: 2px; }
+
+.ln-tape-nums,
+.ln-zoom-nums {
+  position: relative;
+  width: 100%;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.ln-tick-num {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--mx-strong, #0c4a6e);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* 돋보기 띠 */
+.ln-zoom {
+  position: relative;
+  margin-top: 4px;
+  padding: 2px 0;
+  border-radius: 10px;
+  border: 2px solid var(--ln-zoom-line, #f59e0b);
+  background: var(--ln-zoom-bg, #ffffff);
+}
+
+.ln-zoom-badge {
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  font-size: 14px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.ln-zoom-head {
+  position: relative;
+  width: 100%;
+  height: 15px;
+}
+
+.ln-pointer {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ln-pointer, #d97706);
+  user-select: none;
+}
+
+/* 5관 ③: 전체 줄자 위 깃발 */
+.ln-pins {
+  position: relative;
+  width: 100%;
+  height: 56px;
+}
+
+.ln-pin {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+
+.ln-pin.is-hi {
+  z-index: 1;
+}
+
+.ln-pin-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 3px;
+  border-radius: 999px;
+  border: 1.5px solid var(--mx-accent, #0284c7);
+  background: var(--ln-pin-bg, #ffffff);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.ln-pin-stem {
+  width: 2px;
+  height: 6px;
+  background: var(--mx-accent, #0284c7);
+}
+
+.ln-pin.is-hi .ln-pin-stem {
+  height: 30px;
+}
+
+/* 6관: 리본 가게 */
+.ln-ribbon-now {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--mx-strong, #0c4a6e);
+  margin-bottom: 6px;
+  line-height: 1.25;
+}
+
+.ln-ribbon-track {
+  height: 26px;
+}
+
+.ln-ribbon {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  height: calc(100% - 4px);
+  border-radius: 4px;
+  border-right: 2px solid var(--ln-ribbon-line, #db2777);
+  background: var(--ln-ribbon-bg, #f472b6);
+  transition: width 0.25s ease;
+}
+
+.ln-ribbon-btns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin: 10px auto 0;
+}
+
+.ln-ribbon-btns .mx-btn {
+  width: 100%;
+  min-height: 56px;
+}
+
+/* 안내표 (문제 위 한 줄, 연한 노랑 바탕) */
+.ln-fact {
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 2px solid var(--ln-fact-line, #facc15);
+  background: var(--ln-fact-bg, #fef9c3);
+  color: var(--ln-fact-ink, #713f12);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* 4관: 길이 표 (연산 기호 + m 칸 + cm 칸, 3줄) */
+.ln-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 300px;
+  margin: 8px auto;
+  padding: 10px;
+  border-radius: 14px;
+  border: 2px solid var(--mx-line, #7dd3fc);
+  background: var(--mx-softer, #f0f9ff);
+}
+
+.ln-table-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 1fr;
+  gap: 6px;
+  align-items: center;
+}
+
+.ln-table-row.is-ans {
+  padding-top: 6px;
+  border-top: 2.5px solid var(--mx-strong, #0c4a6e);
+}
+
+.ln-table-op {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--mx-sub, #b45309);
+}
+
+.ln-table-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 4px 6px;
+  border-radius: 10px;
+  border: 1.5px solid var(--mx-line, #7dd3fc);
+  background: var(--ln-zoom-bg, #ffffff);
+  color: var(--mx-strong, #0c4a6e);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.ln-table-row.is-ans .ln-table-cell,
+.ln-table-cell.is-blank {
+  border: 2px dashed var(--mx-accent, #0284c7);
+  background: var(--ln-fact-bg, #fef9c3);
+  color: var(--mx-sub, #b45309);
+}
+
+/* 5관 ②: 양팔 그림 줄 */
+.ln-arms {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto;
+  padding: 10px 8px;
+  border-radius: 14px;
+  border: 2px solid var(--mx-line, #7dd3fc);
+  background: var(--mx-softer, #f0f9ff);
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+/* 5관 ③: 깃발 범례 (3줄) */
+.ln-pin-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  max-width: 340px;
+  margin: 6px auto 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--mx-line, #7dd3fc);
+  background: var(--mx-softer, #f0f9ff);
+  color: var(--mx-strong, #0c4a6e);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+@keyframes lnMerge {
+  0% { opacity: 1; transform: scaleX(1) scaleY(1); }
+  100% { opacity: 0; transform: scaleX(0.2) scaleY(0.85); }
+}
+
+@keyframes lnPop {
+  0% { transform: scale(0.92); }
+  65% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-sticks-track.is-merging .ln-stick,
+  .ln-merged.is-pop { animation: none; }
+  .ln-ribbon { transition: none; }
+}
+
+/* 7관 길이 빙고: 「1m 24cm」가 두 줄로 갈라지지 않게 (360px 칸 폭 약 90px) */
+body.mx-theme-lenm .mx-bingo-cell,
+body.mx-theme-lenm .mx-bingo-chip {
+  white-space: nowrap;
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+}

@@ -1,0 +1,164 @@
+{
+  "_설명": "초2-2 수학 3. 길이 재기 탐구퀴즈 12제(아이2). 화면: kids/subjects/math/length_m.html 퀴즈 배틀(MathExplorerQuiz, 질문 자동 읽기). 길이 범위·받아올림 없음은 docs/math_2-2_length_spec.md §2. 작성: antigravity(하이드로젠), 검산: Claude.",
+  "subject": "수학",
+  "grade": "2-2",
+  "unit": "3. 길이 재기",
+  "items": [
+    {
+      "title": "Q01 1m와 같은 길이",
+      "zone": "탐구퀴즈",
+      "question": "1m와 같은 길이는 어느 것일까요?",
+      "choices": [
+        "10cm",
+        "100cm",
+        "1cm"
+      ],
+      "answer": 2,
+      "explanation": "1m는 10cm가 10개 모인 길이로 100cm와 같아요.",
+      "usage": "2-2 3단원 · 1m와 100cm"
+    },
+    {
+      "title": "Q02 몇 m를 cm로",
+      "zone": "탐구퀴즈",
+      "question": "4m는 몇 cm일까요?",
+      "choices": [
+        "400cm",
+        "40cm",
+        "300cm"
+      ],
+      "answer": 1,
+      "explanation": "1m는 100cm이므로 4m는 100cm가 네 번인 400cm예요.",
+      "usage": "2-2 3단원 · 몇 m를 cm로"
+    },
+    {
+      "title": "Q03 몇 cm를 m와 cm로",
+      "zone": "탐구퀴즈",
+      "question": "165cm는 몇 m 몇 cm일까요?",
+      "choices": [
+        "16m 5cm",
+        "1m 56cm",
+        "1m 65cm"
+      ],
+      "answer": 3,
+      "explanation": "100cm는 1m이므로 165cm는 1m와 65cm가 모여 1m 65cm예요.",
+      "usage": "2-2 3단원 · 몇 cm를 m와 cm로"
+    },
+    {
+      "title": "Q04 몇 m 몇 cm를 cm로",
+      "zone": "탐구퀴즈",
+      "question": "3m 6cm는 몇 cm일까요?",
+      "choices": [
+        "306cm",
+        "360cm",
+        "36cm"
+      ],
+      "answer": 1,
+      "explanation": "3m는 300cm이고 여기에 6cm를 더하면 306cm가 돼요.",
+      "usage": "2-2 3단원 · 몇 m 몇 cm를 cm로"
+    },
+    {
+      "title": "Q05 줄자 눈금 읽기",
+      "zone": "탐구퀴즈",
+      "question": "줄자의 0에 맞춘 끈의 끝이 128에 있어요. 끈의 길이는?",
+      "choices": [
+        "12m 8cm",
+        "1m 28cm",
+        "28cm"
+      ],
+      "answer": 2,
+      "explanation": "0에서 128까지는 128cm이고, 100cm가 1m이므로 1m 28cm예요.",
+      "usage": "2-2 3단원 · 줄자 눈금 읽기"
+    },
+    {
+      "title": "Q06 두 길이 비교하기",
+      "zone": "탐구퀴즈",
+      "question": "2m 15cm와 190cm 중 더 긴 길이는 어느 것일까요?",
+      "choices": [
+        "190cm",
+        "두 길이가 같아요",
+        "2m 15cm"
+      ],
+      "answer": 3,
+      "explanation": "2m 15cm는 215cm이므로 190cm보다 더 길어요.",
+      "usage": "2-2 3단원 · 길이 비교하기"
+    },
+    {
+      "title": "Q07 길이의 합 구하기",
+      "zone": "탐구퀴즈",
+      "question": "2m 34cm + 3m 45cm는 얼마일까요?",
+      "choices": [
+        "5m 79cm",
+        "2m 79cm",
+        "6m 69cm"
+      ],
+      "answer": 1,
+      "explanation": "m는 m끼리 2m + 3m = 5m, cm는 cm끼리 34cm + 45cm = 79cm예요.",
+      "usage": "2-2 3단원 · 길이의 합"
+    },
+    {
+      "title": "Q08 길이의 차 구하기",
+      "zone": "탐구퀴즈",
+      "question": "5m 68cm − 2m 23cm는 얼마일까요?",
+      "choices": [
+        "5m 45cm",
+        "3m 45cm",
+        "4m 35cm"
+      ],
+      "answer": 2,
+      "explanation": "m는 m끼리 5m − 2m = 3m, cm는 cm끼리 68cm − 23cm = 45cm예요.",
+      "usage": "2-2 3단원 · 길이의 차"
+    },
+    {
+      "title": "Q09 이야기 합",
+      "zone": "탐구퀴즈",
+      "question": "1m 20cm와 2m 50cm인 끈을 이으면 몇 m 몇 cm?",
+      "choices": [
+        "1m 70cm",
+        "4m 60cm",
+        "3m 70cm"
+      ],
+      "answer": 3,
+      "explanation": "두 끈의 길이를 더하면 1m + 2m = 3m, 20cm + 50cm = 70cm예요.",
+      "usage": "2-2 3단원 · 이야기 합"
+    },
+    {
+      "title": "Q10 이야기 차",
+      "zone": "탐구퀴즈",
+      "question": "4m 85cm 리본에서 1m 30cm를 자르면 남은 길이는?",
+      "choices": [
+        "3m 55cm",
+        "4m 55cm",
+        "2m 65cm"
+      ],
+      "answer": 1,
+      "explanation": "4m − 1m = 3m, 85cm − 30cm = 55cm이므로 3m 55cm가 남아요.",
+      "usage": "2-2 3단원 · 이야기 차"
+    },
+    {
+      "title": "Q11 알맞은 단위 고르기",
+      "zone": "탐구퀴즈",
+      "question": "교실 문 높이로 알맞은 길이는 어느 것일까요?",
+      "choices": [
+        "2cm",
+        "2m",
+        "20cm"
+      ],
+      "answer": 2,
+      "explanation": "교실 문은 어른 키보다 높으므로 약 2m가 알맞아요.",
+      "usage": "2-2 3단원 · 알맞은 단위 고르기"
+    },
+    {
+      "title": "Q12 몸으로 어림하기",
+      "zone": "탐구퀴즈",
+      "question": "양팔을 벌린 길이가 약 1m라면 3번 잰 길이는?",
+      "choices": [
+        "약 30cm",
+        "약 2m",
+        "약 3m"
+      ],
+      "answer": 3,
+      "explanation": "약 1m를 세 번 이어서 재면 약 3m예요.",
+      "usage": "2-2 3단원 · 몸으로 어림하기"
+    }
+  ]
+}

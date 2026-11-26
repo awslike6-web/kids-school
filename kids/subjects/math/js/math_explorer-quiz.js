@@ -90,7 +90,7 @@
       .then(function (data) { return buildQuizFromPages(data && data.results); });
   }
 
-  // opts: { grade: '5-2', unit: '4. 소수의 곱셈'(또는 단원 글자 배열, 또는 { grade, unit } 배열), title: '🏆 소수의 곱셈 퀴즈 배틀', intro: '...', sayQuestion?: true(저학년: 질문 자동 읽기) }
+  // opts: { grade: '5-2', unit: '4. 소수의 곱셈'(또는 단원 글자 배열, 또는 { grade, unit } 배열), title: '🏆 소수의 곱셈 퀴즈 배틀', intro: '...', sayQuestion?: true(저학년: 질문 자동 읽기), speakText?: 함수(질문 → 읽는 글, 길이 단원의 m·cm) }
   function create(opts) {
     var o = opts || {};
     var grade = o.grade || '5-2';
@@ -179,6 +179,7 @@
           answer: item.answerIndex,
           column: true,
           sayQuestion: Boolean(o.sayQuestion),
+          speak: typeof o.speakText === 'function' ? o.speakText(item.q) : '',
           hint: item.explain ? '힌트: ' + item.explain : '',
           explain: item.explain,
           onWrong: function (text) { if (track) track.wrong(text); },

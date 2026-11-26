@@ -196,7 +196,7 @@
 
     // 에러리스 3지선다. 틀리면 고른 보기만 조용히 꺼지고 노란 힌트 + 정답 보기 반짝임.
     // opts: { question, choices:[글자], answer: 원래 번호(0부터), hint: 글자|함수(틀린 번호),
-    //         explain, onSolved, column, sayQuestion, onWrong(고른 글자) — 문항기록용, 선택 }
+    //         explain, onSolved, column, sayQuestion, speak(읽는 글, 없으면 question), onWrong(고른 글자) — 문항기록용, 선택 }
     function choiceQuestion(opts) {
       var box = el('div', 'mx-choice-box');
       if (opts.question) box.appendChild(textEl('p', 'mx-question', opts.question));
@@ -231,7 +231,7 @@
         });
         row.appendChild(btn);
       });
-      if (opts.sayQuestion && opts.question) say(opts.question);
+      if (opts.sayQuestion && opts.question) say(opts.speak || opts.question);
       return box;
     }
 
