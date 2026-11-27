@@ -40,7 +40,7 @@ description: 초등 과학 단원(가상 실험실, 『실험관찰』 실험연
 ### 🚫 절대 금지 사항 (Anti-Regression Rules)
 1. **단순 단어 빈칸 끼워넣기 금지**: `q1`에 용어 3개(`전도`, `대류`, `단열` 등)만 정의 문장에 넣는 용어방 복제 문제를 절대 만들지 않습니다. 반드시 **실험 결과/그래프 해석 및 원리 서술형 문장 조립 빌더(`rubric` + `templateHtml` + 4~5개 과학 구절 블록)**로 작성합니다.
 2. **이미 정렬된 순서 확인 버튼 금지**: `order` 유형의 `steps`는 반드시 `id: 1, 2, 3, 4` 단계별 실험 과정으로 작성하여, 엔진이 무작위로 섞어 제시하고 아이가 직접 1~4단계로 터치해 조립하도록 합니다.
-3. **모달 잔상 및 구버전 캐시 방치 금지**: 단원 추가/수정 시 반드시 `science.html` 하단 스크립트 태그의 `?v=YYYYMMDD_u{N}` 버전을 갱신합니다.
+3. **모달 잔상 및 구버전 캐시 방치 금지**: 단원 추가/수정으로 JS·CSS·데이터 파일을 고쳤으면 커밋 전에 `node scripts/stamp_versions.mjs`를 돌려 `science.html` 등 그 파일을 가리키는 모든 `?v=`를 내용 해시로 맞춥니다. **`?v=YYYYMMDD_u{N}`처럼 손으로 날짜·회차를 적지 않습니다**(2026-11-24~, 손으로 적은 값은 `tests/version-stamps.test.mjs`가 낡은 표시로 잡아 푸시가 막힘). 새로 거는 태그에는 `?v=0`처럼 아무 값이나 붙여 두면 도구가 맞춥니다.
 4. **보기 순서 고정 금지 (2026-11-14~)**: 새 객관식 화면은 `window.QuizChoices.arrange`로 보기를 섞어 그리고 원래 번호로 채점한다. 해설에 「1번은…」처럼 보기 번호를 쓰지 않는다. `tests/quiz-choices-guard.test.mjs`가 빠뜨림을 잡는다(`kids/core/CORE_CATALOG.md` 「`window.QuizChoices`」).
 
 ### ✅ 필수 데이터 스키마 (`window.SCIENCE_LAB_REPORT_{N}_DATA`)
