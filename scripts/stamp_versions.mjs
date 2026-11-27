@@ -16,6 +16,9 @@
  * 사용:
  *   node scripts/stamp_versions.mjs           # 낡은 버전 표시를 고쳐 쓴다
  *   node scripts/stamp_versions.mjs --check   # 고치지 않고 알림(낡은 곳·못 찾은 곳이 있으면 종료 코드 1)
+ *   node scripts/stamp_versions.mjs --only kids/data/gallery-data.js,kids/data/special-days-data.js
+ *     # 적은 파일(저장소 기준 경로)을 가리키는 자리만 고치고, 고친 파일을 `   고침: 경로`로 한 줄씩 알림.
+ *     # 등록 도구가 데이터 파일을 바꾼 뒤 부른다(scripts/version_stamp.py). 다른 낡은 자리는 건드리지 않는다.
  * 조감도 자료(scripts/build_system_map.py)를 다시 만들었다면 그 뒤에 돌린다.
  * 시험: tests/version-stamps.test.mjs (로컬 CI·원격 시험의 node 단계가 늘 검사)
  */
@@ -99,10 +102,11 @@ function isUrlToken(text, offset, whole) {
 }
 
 /** 한 파일 글에서 버전 자리를 지금 해시로 바꾼 글 + 기록 */
-function restamp(file, text, stampOf, byName, root, found) {
+function restamp(file, text, stampOf, byName, root, found, only = null) {
   const rel = path.relative(root, file).replace(/\\/g, '/');
   const pick = (prefix, name, whole) => {
     const target = resolveTarget(file, prefix, name, byName, root);
+    if (only) return target && only.has(sameFile(target)) ? stampOf(target) : null; // 범위 밖은 못 찾아도 알리지 않음
     if (!target) { found.unresolved.push({ file: rel, ref: whole }); return null; }
     return stampOf(target);
   };
@@ -126,7 +130,11 @@ function restamp(file, text, stampOf, byName, root, found) {
  * 고정점까지 반복해 맞춘 결과 → { stale: [{file, ref, want}], unresolved: [{file, ref}], files: Map(file → 고친 글), passes, cyclic }
  * stale은 디스크 기준으로 바뀌는 자리(마지막 값 기준), files는 바뀌는 파일의 최종 글.
  */
-export function scan(root = ROOT) {
+/** 파일 비교용 열쇠 (Windows 대소문자·구분자 차이 무시) */
+const sameFile = file => path.resolve(file).toLowerCase();
+
+export function scan(root = ROOT, { only = null } = {}) {
+  if (only) only = new Set([...only].map(f => sameFile(path.resolve(root, f))));
   const byName = indexByName(root);
   const sources = listSourceFiles(root);
   const contents = new Map();
@@ -141,8 +149,11 @@ export function scan(root = ROOT) {
     passes++;
     for (const file of sources) {
       const found = { stale: [], unresolved: [] };
-      const next = restamp(file, read(file), stampOf, byName, root, found);
-      if (next !== read(file)) { contents.set(file, next); changedAny = true; }
+      const next = restamp(file, read(file), stampOf, byName, root, found, only);
+      if (next !== read(file)) {
+        contents.set(file, next); changedAny = true;
+        if (only) only.add(sameFile(file)); // --only: 바뀐 로더를 가리키는 화면도 줄줄이 맞춘다
+      }
     }
   }
   // 최종 결과를 디스크와 비교해 기록
@@ -150,7 +161,7 @@ export function scan(root = ROOT) {
   for (const file of sources) {
     const disk = fs.readFileSync(file, 'utf8');
     const found = { stale: [], unresolved: [] };
-    restamp(file, disk, stampOf, byName, root, found); // 디스크 글 기준으로 어느 자리가 바뀌는지
+    restamp(file, disk, stampOf, byName, root, found, only); // 디스크 글 기준으로 어느 자리가 바뀌는지
     result.unresolved.push(...found.unresolved);
     if (contents.get(file) !== disk) {
       result.files.set(file, contents.get(file));
@@ -165,8 +176,30 @@ export function stampOfFile(relPath, root = ROOT) {
   return contentStamp(fs.readFileSync(path.join(root, relPath), 'utf8'));
 }
 
+/** `--only a,b` 또는 `--only=a,b` → 저장소 기준 경로 목록 (옵션이 없으면 null) */
+function onlyArg(argv) {
+  const i = argv.findIndex(a => a === '--only' || a.startsWith('--only='));
+  if (i < 0) return null;
+  const raw = argv[i].includes('=') ? argv[i].slice(argv[i].indexOf('=') + 1) : (argv[i + 1] || '');
+  return raw.split(',').map(s => s.trim()).filter(Boolean);
+}
+
+/** --only: 적은 파일을 가리키는 자리만 고치고 고친 파일을 한 줄씩 알린다 (등록 도구용) */
+function mainOnly(onlyRels, check) {
+  const missing = onlyRels.filter(rel => path.isAbsolute(rel) || !existsExact(path.join(ROOT, rel)));
+  if (!onlyRels.length || missing.length) { console.log(`❌ --only 파일이 없습니다(저장소 기준 경로, 대소문자 정확히): ${missing.join(', ') || '(비었음)'}`); return 2; }
+  const { files, cyclic } = scan(ROOT, { only: onlyRels.map(rel => path.join(ROOT, rel)) });
+  if (cyclic) { console.log('❌ 버전이 정해지지 않습니다(고리).'); return 1; }
+  if (!check) for (const [file, text] of files) fs.writeFileSync(file, text, 'utf8');
+  console.log(`🏷️ ${onlyRels.join(', ')}를 가리키는 버전 표시${check ? '가 낡은' : '를 고친'} 파일 ${files.size}개.`);
+  for (const file of files.keys()) console.log(`   고침: ${path.relative(ROOT, file).replace(/\\/g, '/')}`);
+  return check && files.size ? 1 : 0; // --check는 낡은 곳이 있으면 1 (단독 --check와 같음)
+}
+
 function main(argv) {
   const check = argv.includes('--check');
+  const onlyRels = onlyArg(argv);
+  if (onlyRels) return mainOnly(onlyRels, check);
   const { stale, unresolved, files, cyclic } = scan();
   if (cyclic) { console.log(`❌ 서로를 가리키는 파일이 있어 버전이 정해지지 않습니다(${MAX_PASSES}번 반복).`); return 1; }
   if (unresolved.length) {

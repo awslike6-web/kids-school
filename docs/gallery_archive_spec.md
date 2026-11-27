@@ -29,7 +29,7 @@ flowchart TD
     A["사용자 등록 지시<br>(폰 퀵업로드 / PC 로컬 사진·다중사진·MP4 영상)"] --> B["python -X utf8 scripts/sync_quick_upload.py"]
     B --> C["① kids-archive 영구 미디어 최적화 배포<br>(assets/media/... + data/archive-master-data.js)"]
     B --> D["② kids-school 프론트 데이터 갱신<br>(gallery-meta.json ➔ gallery-data.js)"]
-    D --> E["③ gallery.html 캐시 버스팅 자동 갱신<br>(?v=YYYYMMDD-HHMM ➔ 모바일 즉시 반영)"]
+    D --> E["③ 데이터를 가리키는 ?v= 를 내용 해시로 다시 찍기<br>(version_stamp.py ➔ 모바일 즉시 반영)"]
     B --> F["④ 노션 성장 갤러리 DB (3dfa2711...) 작품 카드 Upsert<br>(식별ID = art_... 1:1 일치 + 당일 일상 392a... 연동)"]
 ```
 
@@ -43,7 +43,7 @@ flowchart TD
    - 노션 카드에 쓰는 속성 이름은 [`docs/notion_schemas_school.md`](notion_schemas_school.md)의 `3dfa2711...` 표에 있는 것만 쓴다. `분야`(카테고리) 속성은 노션에 없으므로 `gallery-meta.json`에만 둔다.
 3. **당일 일상 연결**: 작품 카드의 `AI 대화록 및 일상 기록 DB` 연결은 작품 날짜의 일상 페이지(`392a...`)로 한다. 오늘 작품인데 그날 일상 페이지가 아직 없으면 `sync_quick_upload.py`가 개발 타임라인 기록과 같은 함수(`log_dev_timeline.get_or_create_daily_log_page`)로 만들어 연결한다. 지난 날짜는 있는 페이지만 연결하고, 없으면 경고만 하고 비워 둔다(2026-10-28, 작품 등록이 그날 첫 작업이라 연결이 빠지던 문제).
 4. **일기장 분리**: 민서/민수 일기장(`kids/core/daily-diary-base.js` → `daily-diary-forms.js` → `daily-diary-sync.js` → `daily-diary-submit.js`, 클래식 스크립트 순차 로드)의 조회·파서·동기화는 `daily-diary-sync.js`가 맡으며 `구분`이 `마음일기`·`일기`·`종이일기`인 항목만 표시한다. 작품 카드는 `구분: 작품`, 특별한 날 카드는 `구분: 특별한 날`로 지정해 일기장에 섞이지 않게 한다.
-5. **모바일 캐시 버스팅**: `gallery-data.js`가 바뀌면 `kids/common_space/gallery.html` 하단 `<script src="../data/gallery-data.js?v=...">` 버전 쿼리도 함께 바뀌어야 스마트폰에서 새로고침 시 바로 새 작품이 뜬다 (`sync_quick_upload.py`가 자동 갱신).
+5. **모바일 캐시 버스팅**: `gallery-data.js`·`special-days-data.js`가 바뀌면 그 파일을 가리키는 `?v=`(gallery.html·haru.html·parent_dashboard.html)도 바뀌어야 스마트폰에서 새로고침 시 바로 새 작품이 뜬다. 입구(`sync_quick_upload.py`)와 특별한 날 빌더(`add_activity_photo.py`)가 데이터를 쓴 **뒤에** `scripts/version_stamp.py`(→ `node scripts/stamp_versions.mjs --only …`)로 그 자리만 내용 해시로 맞추고 같은 커밋에 넣는다. 등록 전부터 커밋 안 한 다른 변경이 있던 화면은 자동 커밋에서 빼고, 그런 화면이 있거나 node가 없어 도장을 못 찍으면 **커밋만 하고 자동 푸시는 멈춘다**(안내대로 고친 뒤 사람이 푸시). 예전의 시각 글자(`?v=YYYYMMDD-HHMM`)는 버전 시험(`tests/version-stamps.test.mjs`)을 깨뜨려 자동 푸시가 막히므로 쓰지 않는다(2026-11-27).
 
 ---
 

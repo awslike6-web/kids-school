@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { contentStamp, scan, resolveTarget, STAMP_LENGTH } from '../scripts/stamp_versions.mjs';
 
 test('저장소의 모든 ?v= 버전 표시가 파일 내용 해시와 맞고, 가리키는 파일을 모두 찾는다', () => {
@@ -80,5 +81,47 @@ test('도구(검토 반영): 하위 모듈이 바뀌면 로더·화면 버전이
   w('kids/core/a.js', "load('b.js?v=0');\n");
   w('kids/core/b.js', "load('a.js?v=0');\n");
   assert.equal(scan(root).cyclic, true);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('도구 --only(등록 도구용): 적은 데이터 파일을 가리키는 자리만 고치고, 다른 낡은 자리·못 찾는 자리는 건드리지 않음', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'stamp-only-'));
+  const w = (rel, text) => { fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true }); fs.writeFileSync(path.join(root, rel), text); };
+  w('kids/data/gallery-data.js', 'const G = [1, 2];\n');
+  w('kids/js/other.js', 'const O = 1;\n');
+  w('kids/common_space/gallery.html', '<script src="../data/gallery-data.js?v=20261101-0000"></script>\n<script src="../js/other.js?v=old"></script>\n<script src="../js/none.js?v=1"></script>\n');
+  w('parent_dashboard.html', '<script src="kids/data/gallery-data.js?v=abc"></script>\n');
+  const r = scan(root, { only: [path.join(root, 'kids/data/gallery-data.js')] });
+  assert.deepEqual([...r.files.keys()].map(f => path.relative(root, f).split(path.sep).join('/')).sort(), ['kids/common_space/gallery.html', 'parent_dashboard.html']);
+  assert.deepEqual(r.unresolved, []);
+  const html = r.files.get(path.join(root, 'kids/common_space/gallery.html'));
+  assert.ok(html.includes(`gallery-data.js?v=${contentStamp('const G = [1, 2];\n')}`));
+  assert.ok(html.includes('other.js?v=old') && html.includes('none.js?v=1'));
+  // 상대 경로로 줘도 root 기준으로 찾는다
+  assert.equal(scan(root, { only: ['kids/data/gallery-data.js'] }).files.size, 2);
+  // 연쇄: 데이터 → 로더 → 화면이면 로더를 가리키는 화면도 맞춘다 (카본 검토 2026-11-27)
+  w('kids/js/loader.js', "load('../data/gallery-data.js?v=0');\n");
+  w('chain.html', '<script src="kids/js/loader.js?v=0"></script>\n');
+  const chain = scan(root, { only: ['kids/data/gallery-data.js'] });
+  const loader = chain.files.get(path.join(root, 'kids/js/loader.js'));
+  assert.ok(loader && chain.files.get(path.join(root, 'chain.html')).includes(`loader.js?v=${contentStamp(loader)}`));
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('도구 --only 명령: 고친 파일을 「고침:」으로 알리고, --check와 같이 쓰면 낡은 곳이 있을 때 종료 코드 1', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'stamp-only-cli-'));
+  const w = (rel, text) => { fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true }); fs.writeFileSync(path.join(root, rel), text); };
+  w('scripts/stamp_versions.mjs', fs.readFileSync(new URL('../scripts/stamp_versions.mjs', import.meta.url), 'utf8'));
+  w('kids/data/d.js', 'const D = 1;\n');
+  w('page.html', '<script src="kids/data/d.js?v=old"></script>\n');
+  const run = (...args) => spawnSync(process.execPath, ['scripts/stamp_versions.mjs', ...args], { cwd: root, encoding: 'utf8' });
+  const check = run('--only', 'kids/data/d.js', '--check');
+  assert.equal(check.status, 1);
+  assert.match(check.stdout, /   고침: page\.html/);
+  assert.ok(fs.readFileSync(path.join(root, 'page.html'), 'utf8').includes('?v=old'));  // --check는 쓰지 않음
+  const fix = run('--only=kids/data/d.js');
+  assert.equal(fix.status, 0);
+  assert.equal(run('--only', 'kids/data/d.js', '--check').status, 0);
+  assert.equal(run('--only', 'kids/data/none.js').status, 2);  // 없는 파일
   fs.rmSync(root, { recursive: true, force: true });
 });

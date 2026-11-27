@@ -28,6 +28,7 @@ PY_UNITTESTS = [
     'scripts/test_register_voca.py',
     'scripts/test_register_curriculum.py',
     'scripts/test_ci_local.py',
+    'scripts/test_version_stamp.py',
 ]
 NODE_TEST_GLOB = 'tests/**/*.test.mjs'
 

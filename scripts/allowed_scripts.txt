@@ -16,6 +16,8 @@ scripts/check_commit_msg.py
 scripts/check_scripts_allowlist.py
 scripts/ci_local.py  # 로컬 CI: regression.yml과 같은 검사, 관제탑 pre-push 훅이 실행
 scripts/test_ci_local.py  # ci_local.py 시험 (원격 시험 단계와 같은지 대조)
+scripts/version_stamp.py  # 등록 도구용 ?v= 다시 찍기 (stamp_versions.mjs --only 감싸개)
+scripts/test_version_stamp.py  # version_stamp.py 시험
 scripts/generate_pwa_icons.py
 scripts/guarded_preview_server.py
 scripts/register_curriculum.py  # 교재·사료 마스터 DB(CURRICULUM_DB) 문항 등록 (자료 scripts/data/curriculum/*.json)

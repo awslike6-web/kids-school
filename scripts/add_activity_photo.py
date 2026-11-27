@@ -12,7 +12,7 @@
   3. kids/data/special-days-data.js(DEFAULT_SPECIAL_DAYS_DATA)에 id로 upsert
      (같은 id 재실행 = 덮어쓰기, 중복 없음, 기존 likes·stickers·comments 보존)
   4. kids-archive/data/archive-master-data.js에 같은 id로 upsert
-  5. haru.html·gallery.html의 special-days-data.js?v= 캐시 버스팅
+  5. 데이터를 쓴 뒤 special-days-data.js를 가리키는 ?v= 를 내용 해시로 다시 찍기 (scripts/version_stamp.py)
   6. (단독 실행 때만) 바뀐 파일만 골라 두 저장소 커밋·푸시 (--no-git, --no-push)
 
 id: evt_{minseo|minsu|together}_{slug}_{YYYYMMDD}. 공동·아빠·엄마는 together 폴더를 쓴다.
@@ -88,10 +88,6 @@ ID_RE = re.compile(r'^evt_[a-z0-9]+(?:_[a-z0-9]+)*$')
 
 def kst_today():
     return datetime.now(KST).strftime('%Y-%m-%d')
-
-
-def kst_stamp():
-    return datetime.now(KST).strftime('%Y%m%d-%H%M')
 
 
 def check_date(value):
@@ -284,21 +280,24 @@ def upsert_archive(items, plan):
     return items + [archive_entry(plan)]
 
 
-def bump_cache_versions(school_root, write=True):
-    """special-days-data.js?v= 를 지금 시각으로 바꾼다 → 바뀌는 HTML 상대경로 목록."""
-    tag = kst_stamp()
-    changed = []
-    for rel in CACHE_HTML_RELS:
-        p = Path(school_root) / rel
-        if not p.is_file():
-            continue
-        text = p.read_text(encoding='utf-8')
-        new = re.sub(r'(special-days-data\.js)(\?v=[^"\']+)?', rf'\1?v={tag}', text)
-        if new != text:
-            changed.append(rel)
-            if write:
-                p.write_text(new, encoding='utf-8')
-    return changed
+def _version_stamp():
+    sys.path.insert(0, str(Path(__file__).resolve().parent))  # 관제탑 입구가 불러 쓸 때도 같은 scripts 폴더를 찾게
+    import version_stamp  # node scripts/stamp_versions.mjs --only 감싸개
+    return version_stamp
+
+
+def restamp_cache_versions(school_root, foreign):
+    """special-days-data.js를 가리키는 ?v= 를 그 파일 내용 해시로 맞춘다(데이터 파일을 쓴 **뒤에** 부른다).
+    foreign = 쓰기 전에 적어 둔 「커밋 안 한 변경이 있던 파일」. → RestampResult(files·skipped·safe_to_push).
+    예전의 시각 글자(?v=YYYYMMDD-HHMM)는 버전 시험(tests/version-stamps.test.mjs)을 깨뜨려 쓰지 않는다(2026-11-27)."""
+    return _version_stamp().restamp_refs(school_root, [SPECIAL_DAYS_REL], foreign=foreign)
+
+
+def cache_html_candidates(school_root):
+    """미리보기용: 지금 special-days-data.js를 가리키는 화면 (실제 고칠 파일은 데이터를 쓴 뒤 정해진다)."""
+    return [rel for rel in CACHE_HTML_RELS
+            if (Path(school_root) / rel).is_file()
+            and 'special-days-data.js' in (Path(school_root) / rel).read_text(encoding='utf-8')]
 
 
 def optimize_and_save_image(source_path, target_path, max_dim=1200, quality=88):
@@ -336,9 +335,10 @@ def apply_plan(plan, school_root=SCHOOL_ROOT, archive_root=ARCHIVE_ROOT, dry_run
         changed['archive'].append(ARCHIVE_MASTER_REL)
     elif not dry_run:
         print(f'  ⚠️ {archive_path} 가 없어 포트폴리오 갱신을 건너뜁니다.')
-    changed['school'] += bump_cache_versions(school_root, write=not dry_run)
     if dry_run:
+        changed['school'] += cache_html_candidates(school_root)
         return changed
+    foreign = _version_stamp().dirty_files(school_root)  # 쓰기 전: 남의 변경이 있던 파일
 
     for src, rel in plan.image_jobs:
         dest = archive_root / rel
@@ -353,6 +353,12 @@ def apply_plan(plan, school_root=SCHOOL_ROOT, archive_root=ARCHIVE_ROOT, dry_run
         print(f'  🎬 {src.name} → {rel}')
     write_js_array(data_path, text, match, new_items)
     print(f'  ✅ special-days-data.js {plan.action}: {plan.event_id}')
+    stamp = restamp_cache_versions(school_root, foreign) if foreign is not None else None
+    if stamp is None:
+        print('  ⚠️ [버전 표시] git 상태를 읽지 못해 ?v= 를 다시 찍지 않았습니다. 직접 `node scripts/stamp_versions.mjs` 후 커밋하세요.')
+    else:
+        changed['school'] += [rel for rel in stamp.files if rel not in changed['school']]
+    changed['push_ok'] = bool(stamp and stamp.safe_to_push)
     if archive_path.is_file():
         a_text, a_match, a_items = read_js_array(archive_path, ARCHIVE_RE)
         write_js_array(archive_path, a_text, a_match, upsert_archive(a_items, plan))
@@ -444,7 +450,10 @@ def main(argv=None):
     if not args.no_git:
         msg = f'feat(special-days): {plan.author} 특별한 날 등록 {plan.event_id}'
         git_commit(ARCHIVE_ROOT, changed['archive'], msg, push=not args.no_push)
-        git_commit(SCHOOL_ROOT, changed['school'], msg, push=not args.no_push)
+        school_push = not args.no_push and changed.get('push_ok', True)
+        if not args.no_push and not school_push:
+            print('  ⚠️ [버전 표시] ?v= 를 다 맞추지 못해 kids-school은 커밋만 하고 푸시하지 않았습니다. 위 안내대로 고친 뒤 푸시하세요.')
+        git_commit(SCHOOL_ROOT, changed['school'], msg, push=school_push)
     print(f'\n🎉 특별한 날 {plan.action} 완료: {plan.event_id} (노션 카드는 입구 도구가 맞춥니다)')
     return 0
 
