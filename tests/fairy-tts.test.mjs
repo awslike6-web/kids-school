@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { expandFairyChain } from './fairy-chain-source.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = rel => fs.readFileSync(path.join(repoRoot, rel), 'utf8');
@@ -24,13 +25,13 @@ function walk(dir, out = []) {
     return out;
 }
 
-// 정적 <script> 태그 또는 동적 불러오기 목록의 한 항목
-const loadPattern = name => new RegExp(`<script[^>]+${name.replace('.', '\\.')}|['"]${name.replace('.', '\\.')}['"]\\s*,`, 'g');
+// 정적 <script> 태그 또는 동적 불러오기 목록의 한 항목 (목록 이름에 ?v= 가 붙어도 — 묶음 C)
+const loadPattern = name => new RegExp(`<script[^>]+${name.replace('.', '\\.')}|['"]${name.replace('.', '\\.')}(?:\\?v=[^'"]*)?['"](?=\\s*[,\\]])`, 'g'); // 배열 마지막 원소도
 
 test('① 엔진을 싣는 모든 화면·로더가 fairy-tts.js를 먼저, 목록 파일도 함께 싣는다', () => {
     const loaders = [];
     for (const file of walk(repoRoot)) {
-        const src = fs.readFileSync(file, 'utf8');
+        const src = expandFairyChain(fs.readFileSync(file, 'utf8')); // 동적 목록의 ...FAIRY_CORE_CHAIN을 이름으로 펼쳐 같은 규칙으로 검사
         const engine = [...src.matchAll(loadPattern('fairy-engine.js'))];
         if (!engine.length) continue;
         const rel = path.relative(repoRoot, file);
@@ -42,7 +43,7 @@ test('① 엔진을 싣는 모든 화면·로더가 fairy-tts.js를 먼저, 목�
     }
     // 설정창(말하기 속도 단추)이 있는 화면도 fairy-tts.js를 싣는다
     for (const file of walk(repoRoot)) {
-        const src = fs.readFileSync(file, 'utf8');
+        const src = expandFairyChain(fs.readFileSync(file, 'utf8'));
         if (!loadPattern('fairy-settings-engine.js').test(src)) continue;
         assert.ok(loadPattern('fairy-tts.js').test(src), `${path.relative(repoRoot, file)}: 설정창은 있는데 fairy-tts.js 없음`);
     }

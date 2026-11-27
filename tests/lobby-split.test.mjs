@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { root, read, lineCount, assertLoadsInOrder, assetTags } from './split-rules.mjs';
+import { FAIRY_CORE_CHAIN } from './fairy-chain-source.mjs';
 
 const names = ['lobby_config.js', 'lobby_subject_hud.js', 'lobby_controller.js'];
 const files = names.map(name => `kids/js/${name}`);
@@ -158,6 +159,7 @@ function sandbox({ user = 'minsu', admin = '', configured = true, loader = true,
   if (loader) context.loadCoreScripts = (base, cores, callback) => {
     log('cores', base, Array.from(cores)); coreCallbacks.push(callback);
   };
+  context.FAIRY_CORE_CHAIN = [...FAIRY_CORE_CHAIN]; // config.js가 먼저 실려 있는 상태 (묶음 C)
   context.window = context;
   vm.createContext(context);
   return { context, trace, events, timers, requests, coreCallbacks, store, elements, boosts,

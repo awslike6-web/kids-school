@@ -353,18 +353,15 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
     };
 </script>
 
-<script src="../../config.js?v=45e1f3e3"></script>
+<script src="../../config.js?v=b91beb30"></script>
 <script src="../../core/quiz-flow-controller.js?v=b1a38adb"></script>
 
 <script>
     const requiredCores = [
         "notion-helper.js",
-        "fairy-config.js",
-        "fairy-settings-catalog.js",
-        "fairy-settings-engine.js",
-        "fairy-tts.js",
-        "fairy-engine.js",
-        "fairy-chatbot.js"
+        ...FAIRY_CORE_CHAIN, // 🧚 요정 묶음 순서는 config.js 한 벌 (묶음 C)
+        "fairy-settings-engine.js?v=a5b6e4c7",
+        "fairy-chatbot.js?v=bb696a92"
     ];
 
     // ⚙️ 하이브리드 로더 시동!

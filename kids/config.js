@@ -128,6 +128,19 @@ function getRewardWealthHtml(theme, count, imageBasePath) {
 }
 
 // ============================================================================
+// 🧚 요정 묶음 공식 싣는 순서 (한 벌, 2026-11-27 리팩토링 묶음 C — docs/refactor_C_fairy_chain_spec.md)
+// 화면 태그로 싣든 loadCoreScripts로 싣든 이 순서를 따른다. 동적 목록은 [...FAIRY_CORE_CHAIN, 덧붙일 파일] 으로 쓴다.
+// 덧붙이는 파일: fairy-settings-engine.js(catalog 뒤), fairy-chatbot.js(engine 뒤). ?v= 는 stamp_versions.mjs가 찍는다.
+// 시험: tests/fairy-chain.test.mjs
+// ============================================================================
+var FAIRY_CORE_CHAIN = [
+    'fairy-config.js?v=556cfe19',
+    'fairy-tts.js?v=ed19bef4',
+    'fairy-settings-catalog.js?v=080e1dc2',
+    'fairy-engine.js?v=f5ff3e27'
+];
+
+// ============================================================================
 // 🚀 [시스템 로직] 코어 엔진 동적 로더 (수정 금지!)
 // HTML 파일들이 이 함수를 호출하여 스위치(useRemoteCore) 상태에 따라 부품을 조립합니다.
 // ============================================================================

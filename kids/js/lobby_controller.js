@@ -3,14 +3,11 @@
   'use strict';
 
   const lobbyCores = [
-    'core.js',
+    'core.js?v=bc588394', // 버전 해시로 싣는다 — 옛 config.js와 새 core.js가 섞이지 않게 (묶음 C)
     'notion-helper.js',
-    'fairy-config.js',
-    'fairy-tts.js',
-    'fairy-engine.js',
-    'fairy-settings-catalog.js',
-    'fairy-settings-engine.js',
-    'fairy-chatbot.js',
+    ...FAIRY_CORE_CHAIN, // 🧚 요정 묶음 순서는 config.js 한 벌 (묶음 C, 예전엔 engine이 catalog보다 앞이었음)
+    'fairy-settings-engine.js?v=a5b6e4c7',
+    'fairy-chatbot.js?v=bb696a92',
     'daily-diary-base.js',
     'daily-diary-forms.js',
     'daily-diary-sync.js',

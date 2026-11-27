@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { expandFairyChain } from './fairy-chain-source.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
@@ -371,7 +372,7 @@ test('⑥ 지키기 시험: kids/ 안에서 학습설정을 한 조각 고정 �
     for (const file of walkFiles(ROOT)) {
         const rel = path.relative(ROOT, file).replace(/\\/g, '/');
         if (rel.startsWith('scripts/data/system_map')) continue;
-        const src = fs.readFileSync(file, 'utf8');
+        const src = expandFairyChain(fs.readFileSync(file, 'utf8')); // 동적 목록의 ...FAIRY_CORE_CHAIN을 이름으로 펼침
 
         const loadedWriters = writerNames
             .map((name) => ({ name, idx: findScriptLoadIndex(src, name) }))

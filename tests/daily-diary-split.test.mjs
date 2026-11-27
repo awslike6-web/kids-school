@@ -31,7 +31,8 @@ test('네 파일은 지정 머리 주석을 가지며 각각 600줄 이하이고
 
 for (const [file, arrayName] of [['kids/core/core.js', 'requiredCores'], ['kids/js/lobby_controller.js', 'lobbyCores']]) {
   test(`${file}: 로더 배열은 네 파일을 순서대로 한 번씩 싣는다`, () => {
-    const match = read(file).match(new RegExp(`\\b(?:const|let|var)\\s+${arrayName}\\s*=\\s*\\[([\\s\\S]*?)\\]`));
+    // 배열 안에 갈음 목록 [...]이 들어 있을 수 있어(core.js, 묶음 C) 닫는 `];`까지 읽는다
+    const match = read(file).match(new RegExp(`\\b(?:const|let|var)\\s+${arrayName}\\s*=\\s*\\[([\\s\\S]*?)\\];`));
     assert.ok(match, '로더 배열 없음');
     const entries = [...match[1].matchAll(/['"]([^'"]+)['"]/g)].map(item => item[1]);
     assert.deepEqual(entries.filter(name => name.startsWith('daily-diary')), names);

@@ -5,10 +5,10 @@
 var requiredCores = [
     "study-activity.js?v=c3dc3018",
     "notion-helper.js",
-    "fairy-config.js",
-    "fairy-tts.js",
-    "fairy-settings-catalog.js",
-    "fairy-engine.js",
+    // 🧚 요정 묶음 순서는 config.js 한 벌 (묶음 C). core.js는 로비가 이름만으로 동적으로 싣던 파일이라,
+    // 배포 직후 옛 config.js(FAIRY_CORE_CHAIN 없음) 캐시와 만나도 core.js 전체가 멈추지 않게 같은 순서의 이름으로 갈음한다
+    // (카본 검토 2026-11-27). 갈음은 여기 한 곳만 — tests/fairy-chain.test.mjs가 공식 목록과 같은지 대조한다.
+    ...(typeof FAIRY_CORE_CHAIN !== 'undefined' ? FAIRY_CORE_CHAIN : ['fairy-config.js', 'fairy-tts.js', 'fairy-settings-catalog.js', 'fairy-engine.js']),
     "daily-diary-base.js",
     "daily-diary-forms.js",
     "daily-diary-sync.js",

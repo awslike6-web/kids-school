@@ -13,14 +13,18 @@
   - `kids/core/fairy-tts.js` (약 730줄, 음성 합성: Worker 실시간 음성 문장 대기열·브라우저 음성 대체·`stopFairyTTS`·녹음 음성 재생·말하기 속도·아이별 설정 읽기)
   - `kids/core/fairy-engine.js` (약 370줄, 키워드 라우터·캐릭터 목소리 고르기·`fairyPraise/Encourage/Reward/Greet`·음성 ON/OFF)
   - `kids/core/fairy-settings-catalog.js` (캐릭터 목소리 목록 `VOICE_CATALOG`, 요정 코코 녹음 음성 목록 `FAIRY_AUDIO_PRESETS`, 그리고 노션 `INVENTORY_DB` `학습설정` 저장용 1,900자 나눔 함수 `chunkLearningSettingsRichText(text)` — 쓰는 곳 4곳: `fairy-settings-engine.js`, `quiz-flow-controller.js`, `haru-checkin-engine.js`, `parent_progress_controller.js`. 모든 화면이 `fairy-engine.js` 및 쓰는 모듈보다 먼저 싣는다; 단 `gugudan.html`은 인라인 `loadCoreScripts`로 화면 초기화 전에 싣고, `QuizChoices`만 쓰는 `science_season_airmass_lab.html`·`video-unit.js` 단독 로드 실험실은 저장을 호출하지 않는다)
-- **HTML 로드 방법** (순서 지킴: `fairy-tts.js`가 엔진보다 먼저. 새 파일 이름에 `fairy-engine.js` 글자를 넣지 않는다 — `loadCoreScripts`·자산 경로 찾기가 그 글자로 엔진을 찾음):
-  ```html
-  <script src="../core/fairy-config.js"></script>
-  <script src="../core/fairy-tts.js?v=20261116-mixvoice"></script>
-  <script src="../core/fairy-settings-catalog.js"></script>
-  <script src="../core/fairy-engine.js?v=20261028-coco"></script>
-  ```
-  동적 로더 `core.js`(`requiredCores`)·`lobby_controller.js`(`lobbyCores`)도 같은 순서. 시험 `tests/fairy-tts.test.mjs`가 엔진·설정창을 싣는 모든 화면을 검사한다.
+- **싣는 순서 (한 벌, 2026-11-27 리팩토링 묶음 C — `docs/refactor_C_fairy_chain_spec.md`)**: 공식 순서는 `kids/config.js`의 `FAIRY_CORE_CHAIN` 한 곳 — `fairy-config.js` → `fairy-tts.js` → `fairy-settings-catalog.js` → `fairy-engine.js`. 덧붙이는 `fairy-settings-engine.js`는 catalog 뒤, `fairy-chatbot.js`는 engine 뒤(챗봇만 `FAIRY_CONFIG`를 씀). 새 파일 이름에 `fairy-engine.js` 글자를 넣지 않는다(`loadCoreScripts`·자산 경로 찾기가 그 글자로 엔진을 찾음).
+  - **화면 태그**: 해석을 막는 `<script>` 태그로 위 순서대로 싣는다(`?v=`는 `stamp_versions.mjs`가 찍음, 새 태그엔 `?v=0`). 일부만 싣는 화면은 공식 순서의 부분열이면 되지만, engine을 싣으면 4개 모두.
+    ```html
+    <script src="../core/fairy-config.js?v=0"></script>
+    <script src="../core/fairy-tts.js?v=0"></script>
+    <script src="../core/fairy-settings-catalog.js?v=0"></script>
+    <script src="../core/fairy-engine.js?v=0"></script>
+    ```
+  - **동적 로더**: `loadCoreScripts`에 넘기는 목록은 요정 4개를 직접 적지 않고 `...FAIRY_CORE_CHAIN`으로 펼친다(`core.js` `requiredCores`, `lobby_controller.js` `lobbyCores`, `my-room-main.js`, `gugudan.html`). 그래서 `config.js`를 그보다 먼저 싣는다. 이름에 버전이 있어 캐시된다(예전 로비는 `Date.now()` 버전이라 매번 새로 받았음).
+  - **엔진 자가 삽입**은 안전망으로 남되, 일어나면 `console.warn('[요정] fairy-settings-catalog.js가 안 실려…')`.
+  - **시험**: `tests/fairy-chain.test.mjs`(공식 목록·`?v=` 형식, 모든 HTML 태그 규칙 ⓐ~ⓔ, `loadCoreScripts` 호출 파일 자동 수집, `config.js` 먼저, `loadCoreScripts` 계약), `tests/fairy-tts.test.mjs` ①.
+  - **새 요정 코어 파일을 더할 때**: `FAIRY_CORE_CHAIN`에 한 줄 → 태그로 싣는 화면에 태그(시험이 빠진 화면을 알려 줌) → 이 절과 시험의 이름 목록.
 - **핵심 API**:
   | 메서드 | 용도 | 설명 |
   | :--- | :--- | :--- |

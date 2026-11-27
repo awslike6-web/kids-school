@@ -476,11 +476,8 @@
         window.addEventListener('DOMContentLoaded', () => {
             const requiredCores = [
                 'notion-helper.js',
-                'fairy-config.js',
-                'fairy-tts.js',
-                'fairy-settings-catalog.js',
-                'fairy-engine.js',
-                'fairy-chatbot.js',
+                ...FAIRY_CORE_CHAIN, // 🧚 요정 묶음 순서는 config.js 한 벌 (묶음 C)
+                'fairy-chatbot.js?v=bb696a92',
                 'screentime-tracker.js'
             ];
 

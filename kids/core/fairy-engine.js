@@ -193,6 +193,9 @@ function ensureVoiceCatalogLoaded() {
     if (document.querySelector('script[src*="fairy-settings-catalog.js"]')) return;
     const engine = Array.from(document.getElementsByTagName('script')).find(s => s.src && s.src.includes('fairy-engine.js'));
     if (!engine) return;
+    // 안전망: 화면이 목록 파일을 안 실었을 때만 끼워 넣는다(비동기라 엔진 직후 잠깐은 목록이 없을 수 있음).
+    // 순서 잘못이 안전망 뒤에 숨지 않게 알린다 — 공식 순서: config.js FAIRY_CORE_CHAIN (묶음 C)
+    console.warn('[요정] fairy-settings-catalog.js가 안 실려 엔진이 끼워 넣음 — 싣는 순서 확인 (config.js FAIRY_CORE_CHAIN)');
     const tag = document.createElement('script');
     tag.src = engine.src.substring(0, engine.src.lastIndexOf('/') + 1) + 'fairy-settings-catalog.js';
     (document.head || document.documentElement).appendChild(tag);
