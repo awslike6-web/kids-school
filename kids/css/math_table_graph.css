@@ -1,0 +1,521 @@
+/* 2-2 표와 그래프 탐험관: 주황·하늘 테마 + 카드·표·○ 그래프·안내표·투표·빙고 (docs/math_2-2_graph_spec.md §3~§4) */
+/* hidden 속성이 아래 display 규칙(flex·grid)에 덮이지 않게 */
+body.mx-theme-graph2 [hidden] { display: none !important; }
+
+body.mx-theme-graph2 {
+  --mx-head-a: #ffedd5;
+  --mx-head-b: #e0f2fe;
+  --mx-line: #fdba74;
+  --mx-strong: #9a3412;
+  --mx-sub: #0369a1;
+  --mx-accent: #ea580c;
+  --mx-accent-dark: #c2410c;
+  --mx-soft: #ffedd5;
+  --mx-softer: #fff7ed;
+  --tg-card-bg: #ffffff;
+  --tg-card-line: #fdba74;
+  --tg-friend-bg: #f0f9ff;
+  --tg-friend-line: #7dd3fc;
+  --tg-table-head-bg: #ffedd5;
+  --tg-table-total-bg: #e0f2fe;
+  --tg-table-line: #cbd5e1;
+  --tg-table-outer: #ea580c;
+  --tg-blank-bg: #fef9c3;
+  --tg-blank-line: #d97706;
+  --tg-grid-bg: #ffffff;
+  --tg-grid-line: #cbd5e1;
+  --tg-grid-outer: #334155;
+  --tg-axis-bg: #fff7ed;
+  --tg-axis-ink: #0369a1;
+  --tg-mark-ink: #ea580c;
+  --tg-cell-on-bg: #fff7ed;
+  --tg-cell-tap-bg: #f0f9ff;
+  --tg-cell-next-bg: #fef9c3;
+  --tg-cell-next-line: #ea580c;
+  --tg-cell-hl-bg: #e0f2fe;
+  --tg-fact-bg: #f0f9ff;
+  --tg-fact-line: #7dd3fc;
+  --tg-fact-ink: #0c4a6e;
+  --tg-vote-bg: #fff7ed;
+  --tg-vote-line: #fdba74;
+  --tg-stamp-bg: #ffffff;
+  --tg-stamp-on-bg: #e0f2fe;
+  --tg-stamp-on-line: #0284c7;
+}
+
+/* 그림 카드 격자 */
+.tg-cards {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto;
+  box-sizing: border-box;
+}
+
+.tg-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 4px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 2px solid var(--tg-card-line, #fdba74);
+  background: var(--tg-card-bg, #ffffff);
+  text-align: center;
+  user-select: none;
+}
+
+.tg-card-friend {
+  border-color: var(--tg-friend-line, #7dd3fc);
+  background: var(--tg-friend-bg, #f0f9ff);
+}
+
+.tg-card-name {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--mx-strong, #9a3412);
+  white-space: nowrap;
+}
+
+.tg-card-emoji {
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.tg-card-label {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--mx-ink, #1e293b);
+  white-space: nowrap;
+}
+
+/* 표 (가로 두 줄, 6칸 한 줄, 360px 맞춤) */
+.tg-table {
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: var(--tg-grid-bg, #ffffff);
+  border: 2px solid var(--tg-table-outer, #ea580c);
+  box-sizing: border-box;
+}
+
+.tg-table th,
+.tg-table td {
+  border: 1px solid var(--tg-table-line, #cbd5e1);
+  padding: 6px 2px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mx-ink, #1e293b);
+  box-sizing: border-box;
+}
+
+.tg-th-head,
+.tg-td-head {
+  width: 22%;
+  background: var(--tg-table-head-bg, #ffedd5);
+  color: var(--mx-strong, #9a3412);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+.tg-th-kind {
+  background: var(--mx-softer, #fff7ed);
+}
+
+.tg-th-emoji {
+  display: block;
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.tg-th-label {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--mx-ink, #1e293b);
+  white-space: nowrap;
+}
+
+.tg-th-total,
+.tg-td-total {
+  background: var(--tg-table-total-bg, #e0f2fe);
+  color: var(--mx-sub, #0369a1);
+  font-weight: 800;
+}
+
+.tg-td-val,
+.tg-td-total {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.tg-table td.tg-blank {
+  background: var(--tg-blank-bg, #fef9c3);
+  color: var(--tg-blank-line, #d97706);
+  border: 2.5px solid var(--tg-blank-line, #d97706);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+/* ○·×·/ 그래프 */
+.tg-graph-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto;
+  box-sizing: border-box;
+}
+
+.tg-axis-label {
+  align-self: flex-start;
+  margin: 0 0 4px 2px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--tg-axis-ink, #0369a1);
+  user-select: none;
+}
+
+.tg-graph {
+  display: grid;
+  max-width: 100%;
+  border: 2px solid var(--tg-grid-outer, #334155);
+  border-radius: 10px;
+  background: var(--tg-grid-bg, #ffffff);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.tg-axis-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 1px solid var(--tg-grid-line, #cbd5e1);
+  background: var(--tg-axis-bg, #fff7ed);
+  color: var(--tg-axis-ink, #0369a1);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.tg-corner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 1px solid var(--tg-grid-line, #cbd5e1);
+  background: var(--tg-table-head-bg, #ffedd5);
+  color: var(--mx-strong, #9a3412);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  word-break: keep-all;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.tg-kind-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 3px 2px;
+  border: 1px solid var(--tg-grid-line, #cbd5e1);
+  background: var(--tg-axis-bg, #fff7ed);
+  text-align: center;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.tg-kind-emoji {
+  display: block;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.tg-kind-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--mx-ink, #1e293b);
+  white-space: nowrap;
+}
+
+.tg-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--tg-grid-line, #cbd5e1);
+  background: var(--tg-grid-bg, #ffffff);
+  font-family: inherit;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.tg-cell.is-on {
+  background: var(--tg-cell-on-bg, #fff7ed);
+}
+
+.tg-cell.is-hl {
+  background: var(--tg-cell-hl-bg, #e0f2fe);
+}
+
+.tg-cell.tg-tap {
+  cursor: pointer;
+  background: var(--tg-cell-tap-bg, #f0f9ff);
+  touch-action: manipulation;
+}
+
+.tg-cell.tg-tap.is-on {
+  background: var(--tg-cell-on-bg, #fff7ed);
+}
+
+.tg-cell.tg-tap.is-next {
+  background: var(--tg-cell-next-bg, #fef9c3);
+  outline: 2.5px dashed var(--tg-cell-next-line, #ea580c);
+  outline-offset: -3px;
+  animation: tgNextBlink 1.1s ease-in-out infinite;
+}
+
+.tg-graph-wrap.is-locked .tg-cell.tg-tap {
+  cursor: default;
+}
+
+.tg-mark {
+  display: inline-block;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--tg-mark-ink, #ea580c);
+}
+
+.tg-cell.is-pop .tg-mark {
+  animation: tgPop 0.3s ease-out;
+}
+
+@keyframes tgNextBlink {
+  0%, 100% {
+    background: var(--tg-cell-next-bg, #fef9c3);
+    outline-color: var(--tg-cell-next-line, #ea580c);
+  }
+  50% {
+    background: var(--tg-grid-bg, #ffffff);
+    outline-color: var(--mx-line, #fdba74);
+  }
+}
+
+@keyframes tgPop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.4;
+  }
+  65% {
+    transform: scale(1.22);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 안내표 (문제 위 한 줄) */
+.tg-fact {
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 2px solid var(--tg-fact-line, #7dd3fc);
+  background: var(--tg-fact-bg, #f0f9ff);
+  color: var(--tg-fact-ink, #0c4a6e);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* 6관: 표시 고르기 줄 (○ × / 3개 한 줄) */
+.tg-marks {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto;
+}
+
+.tg-marks .mx-btn {
+  flex: 1 1 0;
+  min-height: 56px;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* 6관: 투표 카드 (이름 + 큰 이모지 + 종류 이름) */
+.tg-vote-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto;
+  padding: 10px 14px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  border: 2px solid var(--tg-vote-line, #fdba74);
+  background: var(--tg-vote-bg, #fff7ed);
+  color: var(--mx-strong, #9a3412);
+  font-size: 17px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.tg-vote-emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.tg-vote-name,
+.tg-vote-label {
+  line-height: 1.2;
+}
+
+/* 6관: 종류 버튼 줄 (3~4개, 좁으면 4개는 2+2, 높이 56px, 이모지 위·이름 아래) */
+.tg-kind-btns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto 0;
+}
+
+.tg-kind-btns .mx-btn {
+  flex: 1 1 72px;
+  min-height: 56px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 4px;
+  line-height: 1.15;
+}
+
+.tg-kind-btn-emoji {
+  display: block;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.tg-kind-btn-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@media (max-width: 380px) {
+  .tg-kind-btns .mx-btn:nth-last-child(4):first-child,
+  .tg-kind-btns .mx-btn:nth-last-child(4):first-child ~ .mx-btn {
+    flex: 1 1 calc(50% - 4px);
+  }
+}
+
+/* 6관: 투표 도장 줄 */
+.tg-stamps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto;
+}
+
+.tg-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px dashed var(--mx-line, #fdba74);
+  background: var(--tg-stamp-bg, #ffffff);
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.tg-stamp.is-on {
+  border-style: solid;
+  border-color: var(--tg-stamp-on-line, #0284c7);
+  background: var(--tg-stamp-on-bg, #e0f2fe);
+}
+
+/* 버튼 줄 */
+.tg-btns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin: 10px auto 0;
+}
+
+.tg-btns .mx-btn {
+  flex: 1 1 92px;
+  min-height: 56px;
+}
+
+/* 7관 표 빙고 */
+.tg-bingo-table {
+  width: 100%;
+  margin: 0 auto 12px;
+}
+
+body.mx-theme-graph2 .mx-bingo-cell,
+body.mx-theme-graph2 .mx-bingo-chip {
+  word-break: keep-all;
+  font-size: 0.95rem;
+  line-height: 1.15;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-stamp {
+    transition: none;
+  }
+
+  .tg-cell.tg-tap.is-next,
+  .tg-cell.is-pop .tg-mark {
+    animation: none;
+  }
+}
