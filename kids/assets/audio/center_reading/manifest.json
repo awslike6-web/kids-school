@@ -4035,7 +4035,7 @@
       "audio_file": "768625736fd10f5b17284fa2.mp3",
       "spoken_text": "규칙",
       "sources": [
-        "3faa2711-5b68-818e-9d48-c175c370b420"
+        "book_41"
       ],
       "kinds": [
         "word"
@@ -7605,7 +7605,7 @@
       "audio_file": "97cd464e57e8ed42a77b9532.mp3",
       "spoken_text": "가슴이 철렁하다",
       "sources": [
-        "book_40"
+        "book_41"
       ],
       "kinds": [
         "word"
@@ -7615,7 +7615,207 @@
       "audio_file": "3f6573c03632ab1b53f0fddc.mp3",
       "spoken_text": "몹시 놀라거나 걱정이 되어 가슴이 내려앉는 듯하다",
       "sources": [
-        "book_40"
+        "book_41"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "7220da9aa9e370a725009bc2": {
+      "audio_file": "7220da9aa9e370a725009bc2.mp3",
+      "spoken_text": "공공장소는 여러 사람이 함께 이용하는 곳입니다. 그래서 공공장소에는 규칙이 필요합니다. 예를 들면, 거리에 함부로 쓰레기를 버리지 않습니다. 극장에서는 영화를 볼 때 휴대 전화를 사용하지 않습니다. 도서관에서는 조용히 합니다. 이렇게 공공장소에 규칙이 필요한 이유는 무엇일까요? 그것은 자기 혼자 편안하려는 것이 아니라 사회 전체의 이익을 통해 모두가 행복해지기 위해서입니다. 바로 공익을 중요하게 생각하는 것이지요. 공공장소에서 규칙을 지키는 것에 대한 두 가지 재미난 실험이 있습니다. 어느 날, 주택가 골목에 쓰레기가 담긴 검은 봉투 하나를 던져 놓았습니다. 시간이 지나자 사람들은 눈치를 보며 쓰레기를 던지고 지나갑니다. 어느덧 깨끗하던 골목에 쓰레기가 하나둘씩 쌓이더니 밤새 산더미처럼 쌓이고 말았습니다. 한편, 평소에 사람들이 함부로 버린 쓰레기로 골치를 앓고 있는 골목을 찾아갔습니다. 쓰레기를 함부로 버리지 말라는 경고가 있어도 소용이 없었습니다. 그러다가, 이곳에 있던 쓰레기를 모두 치우고 꽃을 심었습니다. 쓰레기를 버리지 말라는 경고도 치워 버렸습니다. 어떻게 되었을까요? 그날 밤 누군가 쓰레기를 들고 나타났습니다. 꽃을 보고도 그냥 쓰레기를 버립니다. 그런데 갑자기 돌아와서 버린 쓰레기를 도로 주워 갑니다. 하룻밤이 지났지만 어느 누구도 쓰레기를 버리지 않았습니다. 이 실험은 1982년 미국의 범죄 심리학자들이 제안한 '깨진 유리창 이론'을 보여 줍니다. 이 이론에 따르면 유리창이 깨진 자동차를 거리에 내버려 두면 사람들이 그 자동차를 함부로 망가뜨린다고 합니다. 왜냐하면 그 지역에는 법과 질서가 지켜지지 않는다고 생각하기 때문이지요. 즉 사소한 무질서 상태를 내버려 두면 더 큰 범죄와 무질서 상태를 가져올 수 있다는 것입니다. 평소에 법이나 규칙을 잘 지키는 사람도 누군가 규칙을 어기면 똑같이 행동하는 경우가 많다고 합니다. 여러 사람이 공공장소를 편리하게 이용하며 행복하게 살기 위해서는 함께 노력해야 합니다. 아무 생각 없이 버린 쓰레기 하나가 깨끗하던 골목을 쓰레기 더미로 만들 수도 있습니다. 공공장소에서 한 사람이 규칙을 어기면 다른 사람들도 규칙을 지키지 않고 쉽게 어기게 되는 것이지요. 하지만 쓰레기가 버려지는 곳에 꽃을 심었을 때 생기는 변화를 보세요. 조금만 변화를 주면 모두를 위한 공익이 이루어질 수 있습니다.",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "72c1e7b27040d5bda1d87609": {
+      "audio_file": "72c1e7b27040d5bda1d87609.mp3",
+      "spoken_text": "공공장소의 규칙과 깨진 유리창 이론",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "1fc1f573cc70745dca5b38ff": {
+      "audio_file": "1fc1f573cc70745dca5b38ff.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 공공장소의 규칙과 깨진 유리창 이론이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "d557801552f033080071196b": {
+      "audio_file": "d557801552f033080071196b.mp3",
+      "spoken_text": "공공장소",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "3732eede37a7bd1e71061d9e": {
+      "audio_file": "3732eede37a7bd1e71061d9e.mp3",
+      "spoken_text": "사회 사람 모두가 함께 쓰는 장소",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "21fa2a27ab064596d235949b": {
+      "audio_file": "21fa2a27ab064596d235949b.mp3",
+      "spoken_text": "여러 사람이 다 같이 지켜야 마땅한 것으로 정한 약속이나 법",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "c69c037bb4bae073e8ad9412": {
+      "audio_file": "c69c037bb4bae073e8ad9412.mp3",
+      "spoken_text": "이론",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "12c468949884ff0b4f489615": {
+      "audio_file": "12c468949884ff0b4f489615.mp3",
+      "spoken_text": "원리나 이치를 밝히려고 논리에 따라서 짠 틀이나 정리한 생각",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "d4a18427deb3cf851a003950": {
+      "audio_file": "d4a18427deb3cf851a003950.mp3",
+      "spoken_text": "무질서",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "09ad66c96dcae401ca626d0f": {
+      "audio_file": "09ad66c96dcae401ca626d0f.mp3",
+      "spoken_text": "질서가 지켜지지 않고 어지러운 상태",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "6a46191bb5aac85d9dba4811": {
+      "audio_file": "6a46191bb5aac85d9dba4811.mp3",
+      "spoken_text": "깨진 유리창 이론",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "cfd10944e76bb311d2e76290": {
+      "audio_file": "cfd10944e76bb311d2e76290.mp3",
+      "spoken_text": "사소한 무질서를 내버려 두면 더 큰 범죄와 무질서로 이어진다는 이론",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "fa6af1484e3787be656d064d": {
+      "audio_file": "fa6af1484e3787be656d064d.mp3",
+      "spoken_text": "공익",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "f397f96ac410639c473a2413": {
+      "audio_file": "f397f96ac410639c473a2413.mp3",
+      "spoken_text": "사회 모든 사람에게 두루 돌아가는 이익",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "8723f489ab709d30ba35768c": {
+      "audio_file": "8723f489ab709d30ba35768c.mp3",
+      "spoken_text": "경고",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "b06f7e993a68cb2ba8a42661": {
+      "audio_file": "b06f7e993a68cb2ba8a42661.mp3",
+      "spoken_text": "어떤 일을 조심하거나 삼가라고 미리 알려 주는 것",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "beb5ffa581ab442f102fbf7c": {
+      "audio_file": "beb5ffa581ab442f102fbf7c.mp3",
+      "spoken_text": "사소하다",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "5168fbcfb5e0beb2f34fc392": {
+      "audio_file": "5168fbcfb5e0beb2f34fc392.mp3",
+      "spoken_text": "대수롭지 않고 중요하지 않음",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "7fbfece32c76ad1c3cf565b6": {
+      "audio_file": "7fbfece32c76ad1c3cf565b6.mp3",
+      "spoken_text": "골치를 앓다",
+      "sources": [
+        "book_41"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "b5f758d4ed69bc28cfa90b9f": {
+      "audio_file": "b5f758d4ed69bc28cfa90b9f.mp3",
+      "spoken_text": "어떻게 하여야 할지 몰라서 머리가 아플 정도로 생각에 몰두하다",
+      "sources": [
+        "book_41"
       ],
       "kinds": [
         "meaning"
@@ -7934,6 +8134,12 @@
       "audio_file": "47d73a80187692aba7aa440d.mp3",
       "title": "감자에 대한 편견",
       "order": 40
+    },
+    "book_41": {
+      "audio_hash": "7220da9aa9e370a725009bc2",
+      "audio_file": "7220da9aa9e370a725009bc2.mp3",
+      "title": "공공장소의 규칙과 깨진 유리창 이론",
+      "order": 41
     }
   },
   "settings": {
