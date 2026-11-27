@@ -461,94 +461,6 @@ function getKstTodayYMD(date = new Date()) {
         return merged.slice(0, MAX_READING_PASSAGES);
     }
 
-    // ----------------------------------------------------
-    // 3. 시간표 DB 및 노션 블록 파서
-    // ----------------------------------------------------
-    function parseTimetablePeriodSlot(raw) {
-        if (!raw) return { num: null, label: "", timeRange: "", display: "" };
-        const text = String(raw).trim();
-        if (text.includes("0교시") || text.includes("아침") || text === "0") {
-            return { num: 0, label: "0교시", timeRange: "08:20~08:50", display: "0교시(아침)" };
-        }
-        if (text.includes("방과후")) {
-            return { num: 7, label: "방과후", timeRange: "14:40~15:30", display: "방과후" };
-        }
-        if (text.includes("하교") || text.includes("학원") || text.includes("센터") || text.includes("수영") || text.includes("외부")) {
-            return { num: 8, label: "하교 후", timeRange: "15:30~", display: "하교 후" };
-        }
-        const match = text.match(/(\d)\s*교시(?:\s*\(([^)]+)\))?/);
-        if (match) {
-            const num = parseInt(match[1], 10);
-            const timeRange = (match[2] || "").trim();
-            const label = `${num}교시`;
-            const display = timeRange ? `${label}(${timeRange})` : label;
-            return { num, label, timeRange, display };
-        }
-        return { num: null, label: text, timeRange: "", display: text };
-    }
-
-    function inferPeriodNumFromDate(periodDate) {
-        if (!periodDate?.start) return null;
-        const d = new Date(periodDate.start);
-        if (isNaN(d.getTime())) return null;
-        const time = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-        const map = { "08:20": 0, "09:00": 1, "10:00": 2, "11:00": 3, "13:00": 4, "14:00": 5, "15:00": 6, "15:30": 8 };
-        return map[time] !== undefined ? map[time] : null;
-    }
-
-    function parseTimetablePage(page) {
-        const p = page.properties;
-        const periodProp = p["교시 시간"];
-        const periodRaw =
-            p["교시"]?.select?.name ||
-            periodProp?.select?.name ||
-            (periodProp?.rich_text || []).map(t => t.plain_text).join("") ||
-            periodProp?.title?.[0]?.plain_text ||
-            "";
-        const periodSlot = parseTimetablePeriodSlot(periodRaw);
-        const periodDate = periodProp?.date || null;
-        const alertDate = p["알림"]?.date || null;
-        const customDate = p["날짜"]?.date || null;
-        let periodNum = typeof periodSlot.num === 'number' ? periodSlot.num : null;
-        if (periodNum === null && periodDate?.start) {
-            periodNum = inferPeriodNumFromDate(periodDate);
-        }
-        const pageTitle = p["제목"]?.title?.[0]?.plain_text || p["수업"]?.title?.[0]?.plain_text || "";
-        if (periodNum === null && pageTitle) {
-            if (pageTitle.includes("0교시") || pageTitle.includes("아침")) periodNum = 0;
-            else if (pageTitle.includes("방과후")) periodNum = 7;
-            else if (pageTitle.includes("하교") || pageTitle.includes("학원") || pageTitle.includes("센터") || pageTitle.includes("수영")) periodNum = 8;
-            else {
-                const titleMatch = pageTitle.match(/(\d)\s*교시/);
-                if (titleMatch) periodNum = parseInt(titleMatch[1], 10);
-            }
-        }
-
-        const defaultLabel = periodNum === 0 ? "0교시" : (periodNum === 7 ? "방과후" : (periodNum === 8 ? "하교 후" : `${periodNum}교시`));
-
-        return {
-            id: page.id,
-            title: pageTitle,
-            child: p["아이"]?.select?.name || "",
-            subject: p["과목"]?.select?.name || "",
-            dayOfWeek: p["요일"]?.select?.name || "",
-            periodNum,
-            periodSlot: periodSlot.num !== null
-                ? periodSlot
-                : (periodNum !== null ? { num: periodNum, label: defaultLabel, timeRange: "", display: defaultLabel } : { num: null, label: "", timeRange: "", display: "" }),
-            periodStart: periodDate?.start || null,
-            periodEnd: periodDate?.end || null,
-            alertAt: alertDate?.start || null,
-            targetDate: customDate?.start || alertDate?.start || null,
-            targetDateEnd: customDate?.end || alertDate?.end || null,
-            scope: p["적용 범위"]?.select?.name || "",
-            isCompleted: p["완료"]?.checkbox || false,
-            memo: (p["메모"]?.rich_text || []).map(t => t.plain_text).join("") || "",
-            link: p["링크"]?.url || "",
-            createdAt: page.created_time || null,
-            pageContent: ""
-        };
-    }
 
     function extractPlainTextFromNotionBlock(block) {
         if (!block || !block.type) return "";
@@ -634,116 +546,6 @@ function getKstTodayYMD(date = new Date()) {
         return chunks.join("\n\n");
     }
 
-    function isTimetableNoticeCandidate(row) {
-        const hasPeriod = !!(row.periodNum || row.periodSlot?.num);
-        if (hasPeriod) return false;
-        return !!(row.title || row.memo || row.alertAt || row.subject);
-    }
-
-    async function enrichTimetableRowsWithPageContent(rows) {
-        const targets = rows.filter(isTimetableNoticeCandidate);
-        if (!targets.length) return rows;
-
-        await Promise.all(targets.map(async (row) => {
-            const body = await fetchNotionPageBlocksPlainText(row.id);
-            if (body) row.pageContent = body;
-        }));
-
-        return rows;
-    }
-
-    async function fetchTimetableFromNotion(options = {}) {
-        const dbId = options.dbId || TIMETABLE_DB_ID;
-        let allResults = [];
-        let hasMore = true;
-        let nextCursor = undefined;
-
-        try {
-            while (hasMore) {
-                const bodyData = { page_size: 100, sorts: STABLE_SORTS };
-                if (nextCursor) bodyData.start_cursor = nextCursor;
-
-                const response = await fetch(`${PROXY_URL}/v1/databases/${dbId}/query`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(bodyData)
-                });
-
-                if (!response.ok) throw new Error(`노션 시간표 DB 통신 오류 (상태: ${response.status})`);
-
-                const data = await response.json();
-                allResults = allResults.concat(data.results || []);
-                hasMore = data.has_more;
-                nextCursor = data.next_cursor;
-            }
-
-            const rows = allResults
-                .map(parseTimetablePage)
-                .filter(row => row.title || row.subject || row.dayOfWeek || row.memo || row.alertAt);
-
-            if (options.fetchPageContent !== false) {
-                await enrichTimetableRowsWithPageContent(rows);
-            }
-
-            return rows;
-        } catch (error) {
-            console.error("[fetchTimetableFromNotion] 로딩 실패:", error);
-            return [];
-        }
-    }
-
-    async function fetchDualTimetableFromNotion() {
-        const staticDbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.STATIC_TIMETABLE_DB_ID) || "32ba27115b68828bbda201a1bdce12fc";
-        const overlayDbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.EVENT_OVERLAY_DB_ID) || (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TIMETABLE_DB_ID) || "e3f9b3917c2b48bfa3d47db4bd0545fd";
-
-        try {
-            const [staticRows, overlayRows] = await Promise.all([
-                fetchTimetableFromNotion({ dbId: staticDbId, fetchPageContent: false }),
-                fetchTimetableFromNotion({ dbId: overlayDbId, fetchPageContent: true })
-            ]);
-
-            const result = {
-                staticRows: staticRows || [],
-                overlayRows: overlayRows || [],
-                allRows: [...(staticRows || []), ...(overlayRows || [])]
-            };
-
-            if (typeof window.saveTimetableToCache === 'function') {
-                window.saveTimetableToCache(result);
-            }
-            return result;
-        } catch (e) {
-            console.error("[fetchDualTimetableFromNotion] 로딩 실패:", e);
-            if (typeof window.loadTimetableFromCache === 'function') {
-                const cached = window.loadTimetableFromCache();
-                if (cached) {
-                    console.log("⚡ [Timetable Cache] 네트워크 실패로 캐시 데이터 사용");
-                    return cached;
-                }
-            }
-            const fallback = await fetchTimetableFromNotion();
-            return { staticRows: [], overlayRows: fallback, allRows: fallback };
-        }
-    }
-
-    async function updateTimetableItemComplete(pageId, isCompleted) {
-        if (!pageId) return false;
-        try {
-            const response = await fetch(`${PROXY_URL}/v1/pages/${pageId}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    properties: {
-                        "완료": { checkbox: !!isCompleted }
-                    }
-                })
-            });
-            return response.ok;
-        } catch (e) {
-            console.error("[updateTimetableItemComplete] 완료 상태 업데이트 실패:", e);
-            return false;
-        }
-    }
 
     // ----------------------------------------------------
     // 4. 전역 노출 및 네임스페이스 바인딩 (하위 호환 100%)
@@ -765,16 +567,10 @@ function getKstTodayYMD(date = new Date()) {
         fetchReadingPassagesFromNotion,
         mapNotionRecordsToReadingBooks,
         resolveReadingPassageList,
-        parseTimetablePeriodSlot,
-        inferPeriodNumFromDate,
-        parseTimetablePage,
         extractPlainTextFromNotionBlock,
         fetchNotionBlockChildrenPlainText,
         collectPlainTextFromNotionBlock,
-        fetchNotionPageBlocksPlainText,
-        fetchTimetableFromNotion,
-        fetchDualTimetableFromNotion,
-        updateTimetableItemComplete
+        fetchNotionPageBlocksPlainText
     };
 
     // 기존 단독 전역 바인딩 보존
@@ -790,11 +586,5 @@ function getKstTodayYMD(date = new Date()) {
     window.mapNotionRecordsToReadingBooks = mapNotionRecordsToReadingBooks;
     window.resolveReadingPassageList = resolveReadingPassageList;
     window.MAX_READING_PASSAGES = MAX_READING_PASSAGES;
-    window.parseTimetablePeriodSlot = parseTimetablePeriodSlot;
-    window.inferPeriodNumFromDate = inferPeriodNumFromDate;
-    window.parseTimetablePage = parseTimetablePage;
-    window.fetchTimetableFromNotion = fetchTimetableFromNotion;
-    window.fetchDualTimetableFromNotion = fetchDualTimetableFromNotion;
-    window.updateTimetableItemComplete = updateTimetableItemComplete;
 
 })(typeof window !== 'undefined' ? window : this);

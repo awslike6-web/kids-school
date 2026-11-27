@@ -26,7 +26,8 @@ window.roomStartTime = window.roomStartTime || new Date();
     const submodules = [
         'study-activity.js?v=c3dc3018', // foreground, idle, interval ledger
         'notion-cache-manager.js?v=dc0ca8ba', // ⚡ 캐시 & 프리패치 & syncAllNotionData
-        'notion-api-client.js?v=b86a9650',      // 🌐 Worker 통신 & VOCA/독해/시간표 쿼리 및 파서
+        'notion-api-client.js?v=dcb0382d',      // 🌐 Worker 통신 & VOCA/독해 쿼리·파서, 노션 페이지 본문 읽기
+        'notion-timetable.js?v=bd83cfdf',      // ⏰ 시간표 파서·조회·캐시 (한 벌, 2026-11-27 묶음 D — 예전엔 api-client 안에 사본이 있었음)
         'study-log-store.js?v=80cfe205', // 📒 학습일지 일일 Upsert & 연속 학습 스트릭 단일 원천
         'learning-log.js?v=5cf3ce8e', // 📒 문항 단위 학습 기록 (학습일지 행의 '문항기록' 칸)
         'timetable-boost.js?v=82713b6c', // 🚀 시간표 부스트(오늘 복습 1.2배·한도 150, 내일 예습 완주 +7) — 과목방에서도 적용 (2026-11-23)
@@ -140,27 +141,27 @@ async function fetchReadingPassagesFromNotion(options = {}) {
 
 // ⏰ 시간표
 async function fetchTimetableFromNotion(options = {}) {
-    if (window.NotionApiClient && typeof window.NotionApiClient.fetchTimetableFromNotion === 'function') {
-        return window.NotionApiClient.fetchTimetableFromNotion(options);
+    if (window.NotionTimetable && typeof window.NotionTimetable.fetchTimetableFromNotion === 'function') {
+        return window.NotionTimetable.fetchTimetableFromNotion(options);
     }
-    await _waitForModule('NotionApiClient');
-    return window.NotionApiClient?.fetchTimetableFromNotion?.(options) || [];
+    await _waitForModule('NotionTimetable');
+    return window.NotionTimetable?.fetchTimetableFromNotion?.(options) || [];
 }
 
 async function fetchDualTimetableFromNotion() {
-    if (window.NotionApiClient && typeof window.NotionApiClient.fetchDualTimetableFromNotion === 'function') {
-        return window.NotionApiClient.fetchDualTimetableFromNotion();
+    if (window.NotionTimetable && typeof window.NotionTimetable.fetchDualTimetableFromNotion === 'function') {
+        return window.NotionTimetable.fetchDualTimetableFromNotion();
     }
-    await _waitForModule('NotionApiClient');
-    return window.NotionApiClient?.fetchDualTimetableFromNotion?.() || { staticRows: [], overlayRows: [], allRows: [] };
+    await _waitForModule('NotionTimetable');
+    return window.NotionTimetable?.fetchDualTimetableFromNotion?.() || { staticRows: [], overlayRows: [], allRows: [] };
 }
 
 async function updateTimetableItemComplete(pageId, isCompleted) {
-    if (window.NotionApiClient && typeof window.NotionApiClient.updateTimetableItemComplete === 'function') {
-        return window.NotionApiClient.updateTimetableItemComplete(pageId, isCompleted);
+    if (window.NotionTimetable && typeof window.NotionTimetable.updateTimetableItemComplete === 'function') {
+        return window.NotionTimetable.updateTimetableItemComplete(pageId, isCompleted);
     }
-    await _waitForModule('NotionApiClient');
-    return window.NotionApiClient?.updateTimetableItemComplete?.(pageId, isCompleted) || false;
+    await _waitForModule('NotionTimetable');
+    return window.NotionTimetable?.updateTimetableItemComplete?.(pageId, isCompleted) || false;
 }
 
 // 📝 학습일지 & 보상

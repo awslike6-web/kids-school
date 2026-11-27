@@ -53,6 +53,23 @@
 ### D. 800줄 근접 파일 점검 — 파일마다 등급이 다름 (점검 Claude, 나누기 네온)
 - 13개를 훑어서 "한 책임인데 길다"(놔둠)와 "두 책임이 섞였다"(나눔)로 가른다. 나누기는 §8-0 기준(300~600줄 완성형 단위)을 따르고, 50~100줄로 잘게 쪼개지 않는다.
 - 공용 코어 3개(`notion-api-client`·`fairy-tts`·`quest-mastery`)는 L2다.
+- **분류 결과 (2026-11-27, 750줄 이상 16개 — 루트 HTML 3개 포함)**:
+
+  | 파일 | 줄 | 판정 |
+  | :--- | ---: | :--- |
+  | `kids/core/notion-api-client.js` | 800 | **D1 끝**: 시간표 파서가 `notion-timetable.js`와 두 벌이었음 → 한 벌로(590줄) |
+  | `kids/subjects/quest/quest-mastery.js` | 792 | **D2 후보(L2)**: 320~567행 한글 받침·모음 분석(약 250줄)이 따로 떼기 좋은 책임 |
+  | `kids/js/science_report.js` | 784 | **D3 후보**: 보고서 그리기(약 300줄)와 퀴즈(빈칸·선택·순서·별점, 약 390줄)가 섞임 |
+  | `kids/js/society_common.js`·`korean_common.js`·`english_common.js` | 772~794 | **→ 묶음 E**: 세 과목방 대문이 같은 뼈대(방 열기·학년/단원 고르기·미션 시작·보상)를 각자 복사 |
+  | `kids/subjects/math/fractions_decimals.html` | 770 | **→ 묶음 F**: 공용 탐험관 틀 이전의 옛 화면(인라인 스크립트 413줄) |
+  | `minseo_lab.html` | 780 | 살펴볼 것: 인라인 스크립트 241줄·스타일 51줄 — 파일로 빼면 줄지만 급하지 않음 |
+  | `kids/core/fairy-tts.js` | 796 | 놔둠(지켜봄): 음성 합성 한 책임. 10-28에 엔진에서 이미 떼어 낸 파일 |
+  | `kids/subjects/haru/js/haru-timeline-engine.js` | 783 | 놔둠: 하루 시간표 한 기능(시계판·목록·스티커는 서로 맞물림) |
+  | `kids/subjects/quest/monster_lab_controller.js` | 754 | 놔둠: 한 화면 조종기 |
+  | `kids/subjects/math/js/table_graph-core.js`·`bar_line-core.js` | 796·785 | 놔둠(지금은): 문제 생성 한 책임, 수학 사다리 세션이 만드는 중인 구역 |
+  | `kids/css/math_operator_studio.css` | 789 | 놔둠: 한 화면 스타일 |
+  | `lobby.html`·`monster_lab.html` | 770·781 | 놔둠: 인라인 스크립트가 거의 없는 마크업 |
+
 
 ### E. 중복 도우미 합치기 — 현황판 카드 2번 (목록 Claude)
 - 과목 공통 파일(`korean_common.js` 783, `english_common.js` 772, `society_common.js` 794)과 수학 `*-core.js`에서 같은 일을 하는 함수(섞기·날짜·말풍선·보상 호출 등)를 찾아 공용으로 올린다.
@@ -71,4 +88,5 @@
 | 2026-11-27 | 0 (목록) | 이 문서 작성 |
 | 2026-11-27 | A | `--add-missing`·빠진 자리 시험 추가, HTML 125개의 `?v=` 521곳 채움(하이드로젠 medium 초안, Claude 적용·검수). 버전 글자를 그대로 비교하던 시험 7개를 쿼리 무시로 고침 |
 | 2026-11-27 | B | `kids/data/legacy_backup/`(5개)·`kids/deprecated_backup/`(2개) 지움, 검사 제외 목록·주석 정리. 되살리기: `git checkout 2b7de65b -- kids/data/legacy_backup kids/deprecated_backup` |
+| 2026-11-27 | D1 | 시간표 파서 두 벌(`notion-api-client.js` 안 사본 약 210줄 ↔ `notion-timetable.js`) → `notion-timetable.js` 한 벌(IIFE, 공개 9개 + `NotionTimetable`), 본문 읽기 4개는 api-client 한 벌. 사본에만 있던 정렬 수정을 옮겨 `timetable.html` 행 누락 위험도 고침. 시험 `notion-timetable.test.mjs` 5개. 카본 diff 검토 8개 중 3개 반영 |
 | 2026-11-27 | C | 요정 묶음 순서 한 벌 `config.js` `FAIRY_CORE_CHAIN`, 동적 목록 4곳이 펼쳐 씀(로비 engine↔catalog 순서 바로잡음·요정 파일 캐시됨), 태그 순서 12화면 바로잡음, 엔진 자가 삽입 경고, `tests/fairy-chain.test.mjs`(네온 medium 초안). 설계 검토 카본·네온 |
