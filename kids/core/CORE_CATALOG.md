@@ -490,6 +490,8 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - **소수 탐험관 화면**: `decimal_add-draw.js`(그리기 도우미 `DecAddDraw`: grid(10×10 모눈)·gridStepper(＋0.1·＋0.01, 목표에서 잠김)·strip(숫자 띠)·numberLine(구간 고르며 두 번 확대)·pointMover(10배·1/10, 반대 방향은 노란 안내만)·column(세로셈 칸판: 0 채우기→소수점 내려 찍기→오른쪽 자리부터 3지선다, 받아올림·받아내림 표시)), `decimal_add-labs-a.js`(1~3관, `DecAddLabs`), `decimal_add-labs-b.js`(4~7관 + `mount`), `kids/css/math_decimal_add.css`(`mx-theme-decadd`). `decimal_multiplication-core.js` → `decimal_add-core.js` → draw → labs 순서로 싣는다. 학습일지 키 `g:dec4-<종류>`.
 - 퀴즈 자료: `scripts/data/curriculum/math_4-2_1.json`·`math_4-2_3.json`(각 12제, 분수는 글자 표기 계약).
 - 화면 시험: `tests/math-ladder-pages.test.mjs`(실림 순서·상대 경로·600줄·대문 카드 2곳·세로 분수 옵션·글자 분수 금지·조사·학습일지 키).
+- 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
+- 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
 ### 🍰 3-1 분수와 소수 첫걸음 탐험관 (2026-11-28, 옛 화면을 공용 틀로)
 
@@ -525,8 +527,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/subjects/math/js/shape_movement-core.js` (`window.MoveCore`, 순수 모듈): `SHAPE`(대칭 없는 F 모양 — 뒤집기·돌리기 8가지 결과가 모두 다름)·`OPS`(움직임 이름)·`apply(점들, 움직임)`(화면 좌표 y 아래, `cw90`은 위쪽 → 오른쪽)·`key`/`same`(꼭짓점 집합 비교)·`bounds`·`normalize`·`makeSlide`(판 안에 남는 방향·1~4칸)·`makeFlipQuiz`/`makeTurnQuiz`(처음 → 나중, 같은 결과가 나오는 움직임은 보기에 함께 두지 않음: 오른쪽·왼쪽 뒤집기, 시계 270°·반대 90°)·`PATTERN_RULES`/`makePattern`(3×3 무늬, 규칙마다 무늬가 다름).
 - `kids/subjects/math/js/shape_movement-labs.js` (`window.MoveLabs`): 1관 밀기(방향 버튼으로 n칸 밀기, 처음 자리 점선)·2관 뒤집기·3관 돌리기(둘러보기 버튼 + 처음 → 나중 고르기)·4관 무늬 꾸미기(보기 무늬대로 타일 돌리기) + 퀴즈 배틀(`4-1`·`4. 평면도형의 이동`). `kids/css/math_shape_movement.css`(`mx-theme-move4`).
 - 퀴즈 자료 `scripts/data/curriculum/math_4-1_4.json`(12제). 시험 `tests/math-shape-movement4.test.mjs`.
-- 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
-- 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
+
+### 📐 4-1 각도 탐험관 (2026-11-28, 옛 화면을 공용 틀로)
+
+옛 `angles_concept.html`(213줄) + `js/angles_concept.js`(532줄, 박힌 번개 퀴즈)을 공용 틀로 옮김(묶음 F6). 옛 `js/angles_concept.js`는 지움. 계단: ⬇ 3-1 평면도형(각·직각) · ⬆ 4-2 삼각형·사각형.
+- `kids/subjects/math/js/angles_concept-core.js` (`window.AngleCore`, 순수 모듈): 각은 수학 좌표(0°=오른쪽, 시계 반대 방향). `polar`(SVG 점, y 뒤집음)·`wedgePath`(부채꼴)·`kind`(예각·직각·둔각, 0°·180°는 null)·`makeRead`(각도기 읽기 20°~160°, 오답 = 반대 눈금 180−각·한 칸 ±10)·`makeBuild`(각 만들기 목표, 직전과 다른 종류)·`triPoints`/`quadPoints`(적힌 각대로 실제 꼭짓점 계산, 사각형은 두 변 길이를 풀어 닫음)·`cornerStart`/`measure`·`fit`(상자 맞춤)·`makeTriangle`(가장 작은 각 30° 이상)/`makeQuad`(60°~130°, 합 360°).
+- `kids/subjects/math/js/angles_concept-labs.js` (`window.AngleLabs`): 1관 각도기 읽기(안쪽·바깥쪽 눈금, 틀린 눈금 힌트)·2관 각 만들기(슬라이더·±5°, 다 만든 뒤 예각·직각·둔각 고르기)·3관 삼각형 세 각(세 모퉁이 모으기 → 일직선)·4관 사각형 네 각(네 모퉁이 모으기 → 한 바퀴, 대각선 긋기) + 퀴즈 배틀(`4-1`·`2. 각도`). `kids/css/math_angles_concept.css`(`mx-theme-angles4`, 같은 파일 이름에 새 내용).
+- 퀴즈 자료 `scripts/data/curriculum/math_4-1_2.json`(12제). 시험 `tests/math-angles-concept4.test.mjs`(옛 분리 시험 `math-pages-split2`에서는 각도 화면을 뺌). 「평각」은 중학교 말이라 쓰지 않음.
 
 ### 📊 4학년 막대그래프·꺾은선그래프 탐험관 (2026-11-25)
 
@@ -654,9 +661,9 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 ### 수학 대문·각도 페이지 인라인 CSS·JS 분리 (2026-10-31)
 
 - `kids/subjects/math/math.html`(466줄, 2026-11-14 3단원 카드 2장 추가)은 `kids/css/math_lobby.css`(267줄)와 `kids/subjects/math/js/math_lobby.js`(130줄)를 원래 인라인 블록 위치에서 로드합니다. 전역 함수 `openMathSection`·`switchConceptMode`·`filterGradeSector`·`filterTopicSector`, 즉시 실행되는 `goLobbyBtn` 클릭 등록과 기존 `DOMContentLoaded` 초기화를 보존합니다.
-- `kids/subjects/math/angles_concept.html`(214줄)은 `kids/css/math_angles_concept.css`(123줄)와 `kids/subjects/math/js/angles_concept.js`(533줄)를 같은 방식으로 로드합니다. `setAngleValue`·`onSliderAngleChange`·`selectAngleType`·`switchPolygonSum`·`setQuadMethod`·`setTriCutState`·`setQuadCutState`·`setQuadSplit`·`generateMissingAngleProblem`·`nextQuiz` 등 기존 전역 핸들러와 초기화를 유지합니다.
+- (2026-11-28 이후 바뀜) `angles_concept.html`은 묶음 F6에서 공용 탐험관 틀로 옮겨 아래 전역 핸들러가 없어졌습니다. 「4-1 각도 탐험관」 절을 보세요. 옛 기록: 214줄 화면이 `kids/css/math_angles_concept.css`(123줄)와 `kids/subjects/math/js/angles_concept.js`(533줄)를 같은 방식으로 로드했습니다. `setAngleValue`·`onSliderAngleChange`·`selectAngleType`·`switchPolygonSum`·`setQuadMethod`·`setTriCutState`·`setQuadCutState`·`setQuadSplit`·`generateMissingAngleProblem`·`nextQuiz` 등 기존 전역 핸들러와 초기화를 유지합니다.
 - 상대 경로와 캐시 버전 `20261031-math-split2`를 사용하며 클래식 스크립트·기존 외부 스크립트 순서·원문·마크업은 변경하지 않습니다. 두 페이지 모두 뒤에 오는 스크립트가 없고 JS는 한 파일씩입니다.
-- 검증: `tests/math-pages-split2.test.mjs`(고정 main fixture·600줄 제한·원문·마크업·상대 경로·단독 VM 로드). 대문 VM은 기존 `goLobbyBtn` 조회와 클릭 등록만 허용합니다. 분리 계약과 화면 확인 담당은 `docs/math_pages_split2_spec.md`를 따릅니다.
+- 검증: `tests/math-pages-split2.test.mjs`(2026-11-28부터 대문만, 600줄 제한·상대 경로·단독 VM 로드). 대문 VM은 기존 `goLobbyBtn` 조회와 클릭 등록만 허용합니다. 분리 계약과 화면 확인 담당은 `docs/math_pages_split2_spec.md`를 따릅니다.
 
 ### 수학 세로셈 JS 분리 (2026-11-01)
 

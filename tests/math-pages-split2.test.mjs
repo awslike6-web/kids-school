@@ -1,4 +1,4 @@
-// 수학 대문·각도 페이지 분리 규칙: 상대 경로·줄 상한·인라인 금지·로드·HTML 호출 함수 선언·즉시 실행 동작.
+// 수학 대문 페이지 분리 규칙 (각도 화면은 2026-11-28 공용 탐험관 틀로 옮겨 tests/math-angles-concept4.test.mjs가 맡음): 상대 경로·줄 상한·인라인 금지·로드·HTML 호출 함수 선언·즉시 실행 동작.
 // 2026-11-14: 얼린 원본(tests/fixtures/math-split)과의 원문·마크업 통째 대조는 대문 카드 추가 같은 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -9,8 +9,7 @@ import { root, read, lineCount, assertLoadsInOrder, assertRelativeAssets, assert
     assertInlineHandlersDeclared, resolveFrom } from './split-rules.mjs';
 
 const pages = [
-    ['math', 'math_lobby.css', 'math_lobby.js'],
-    ['angles_concept', 'math_angles_concept.css', 'angles_concept.js']
+    ['math', 'math_lobby.css', 'math_lobby.js']
 ];
 
 for (const [name, cssName, jsName] of pages) {

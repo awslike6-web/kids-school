@@ -1,123 +1,110 @@
+/* 초등 4학년 각도 탐험관 전용 스타일 (공용 틀 math_explorer.css 위에 얹음, 2026-11-28 묶음 F6) */
+body.mx-theme-angles4 {
+  --mx-head-a: #fdf2f8;
+  --mx-head-b: #e0f2fe;
+  --mx-line: #f9a8d4;
+  --mx-strong: #9d174d;
+  --mx-sub: #0369a1;
+  --mx-accent: #db2777;
+  --mx-accent-dark: #be185d;
+  --mx-soft: #fce7f3;
+  --mx-softer: #fdf2f8;
+}
 
-    /* 반원 각도기 SVG 캔버스 */
-    .protractor-canvas-box {
-      background: #ffffff;
-      border: 3px solid #0284c7;
-      border-radius: 24px;
-      padding: 20px 14px;
-      margin: 15px auto;
-      max-width: 580px;
-      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.15);
-      text-align: center;
-    }
-    .protractor-svg-wrap {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .protractor-svg-wrap svg {
-      width: 100%;
-      max-width: 440px;
-      height: auto;
-    }
+.ac-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 12px;
+}
 
-    /* 각도 슬라이더 컨트롤러 */
-    .angle-slider-wrap {
-      margin: 15px auto;
-      max-width: 400px;
-      padding: 0 10px;
-    }
-    .angle-slider {
-      width: 100%;
-      height: 10px;
-      border-radius: 5px;
-      background: #e2e8f0;
-      outline: none;
-      -webkit-appearance: none;
-      cursor: pointer;
-    }
-    .angle-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #0284c7;
-      border: 3px solid #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      cursor: pointer;
-    }
+.ac-next { display: block; margin-top: 8px; }
 
-    /* 각도 판정 뱃지 */
-    .angle-badge-result {
-      font-family: 'Jua', sans-serif;
-      font-size: 2.2rem;
-      color: #0284c7;
-      display: inline-block;
-      margin: 8px 0;
-    }
-    .angle-type-tag {
-      font-size: 1.15rem;
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-weight: bold;
-      margin-left: 8px;
-    }
-    .tag-acute { background: #dcfce7; color: #15803d; border: 1.5px solid #86efac; }
-    .tag-right { background: #e0f2fe; color: #0369a1; border: 1.5px solid #7dd3fc; }
-    .tag-obtuse { background: #fef3c7; color: #b45309; border: 1.5px solid #fde68a; }
-    .tag-straight { background: #fce7f3; color: #be185d; border: 1.5px solid #fbcfe8; }
+.ac-mission-text {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 2px dashed var(--mx-line);
+  background: var(--mx-softer);
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.15rem;
+  color: var(--mx-strong);
+}
 
-    /* 카드 그리드 */
-    .angle-card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 10px;
-      margin: 15px 0;
-    }
-    .angle-btn-card {
-      background: #ffffff;
-      border: 2px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 12px 6px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
-    }
-    .angle-btn-card:hover, .angle-btn-card.active {
-      transform: translateY(-3px);
-      border-color: #0284c7;
-      background: #f0f9ff;
-      box-shadow: 0 8px 16px rgba(2, 132, 199, 0.2);
-    }
-    .angle-card-icon { font-size: 2.2rem; margin-bottom: 4px; }
-    .angle-card-name { font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #1e293b; font-weight: bold; }
-    .angle-card-range { font-size: 0.82rem; color: #0284c7; font-weight: 700; }
+.ac-mission-count {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--mx-sub);
+}
 
-    /* 삼각형 & 사각형 각의 합 시각화 */
-    .polygon-sum-box {
-      background: #fff;
-      border: 3px solid #ec4899;
-      border-radius: 24px;
-      padding: 20px;
-      margin: 15px auto;
-      max-width: 580px;
-      text-align: center;
-    }
+.ac-note {
+  margin: 6px 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--mx-strong);
+}
 
-    /* 단위 환산 상자 */
-    .unit-exchange-card {
-      background: #fdfbf7;
-      border: 2px dashed #0284c7;
-      border-radius: 16px;
-      padding: 16px;
-      margin-top: 12px;
-      font-family: 'Jua', sans-serif;
-      font-size: 1.25rem;
-      color: #1e293b;
-      line-height: 1.8;
-      text-align: left;
-    }
-  
+.ac-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* 각도기 */
+.ac-prot-board { max-width: 420px; margin: 8px auto; }
+.ac-prot { fill: #e0f2fe; stroke: #0284c7; stroke-width: 2; }
+.ac-prot-hole { fill: #ffffff; stroke: #0284c7; stroke-width: 1.5; }
+.ac-tick { stroke: #0369a1; stroke-width: 1.2; }
+.ac-scale-out,
+.ac-scale-in {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.ac-scale-out { fill: #b45309; }
+.ac-scale-in { fill: #1d4ed8; }
+.ac-baseline { stroke: #0f172a; stroke-width: 2.5; }
+.ac-ray { stroke: #e11d48; stroke-width: 4; stroke-linecap: round; }
+.ac-wedge { fill: #f43f5e; opacity: 0.35; }
+.ac-vertex { fill: #e11d48; }
+
+.ac-slider {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin: 4px auto 0;
+  accent-color: var(--mx-accent);
+}
+
+/* 삼각형·사각형 */
+.ac-shape-board { max-width: 340px; margin: 8px auto; }
+.ac-gather-board { max-width: 300px; margin: 4px auto; }
+.ac-shape { fill: #fdf2f8; stroke: #db2777; stroke-width: 2.5; stroke-linejoin: round; }
+.ac-diagonal { stroke: #e11d48; stroke-width: 2.5; stroke-dasharray: 6 4; }
+.ac-corner { opacity: 0.85; }
+.ac-corner.ac-gathered { opacity: 1; stroke: #ffffff; stroke-width: 2; }
+.ac-c0 { fill: #f97316; }
+.ac-c1 { fill: #0284c7; }
+.ac-c2 { fill: #ec4899; }
+.ac-c3 { fill: #10b981; }
+.ac-label {
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 15px;
+  fill: #334155;
+  paint-order: stroke;
+  stroke: #fdf2f8;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.ac-label-q { fill: #e11d48; font-size: 19px; }
+.ac-label-in { fill: #ffffff; font-size: 14px; stroke: none; }
