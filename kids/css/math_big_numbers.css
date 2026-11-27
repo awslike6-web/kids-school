@@ -1,0 +1,205 @@
+/* 초등 4학년 큰 수 탐험관 전용 스타일 (공용 틀 math_explorer.css 위에 얹음) */
+body.mx-theme-bignum4 {
+  --mx-head-a: #e0e7ff;
+  --mx-head-b: #e0f2fe;
+  --mx-line: #a5b4fc;
+  --mx-strong: #312e81;
+  --mx-sub: #0369a1;
+  --mx-accent: #4f46e5;
+  --mx-accent-dark: #4338ca;
+  --mx-soft: #e0e7ff;
+  --mx-softer: #eef2ff;
+}
+
+.bn-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.bn-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.bn-pick.active {
+  background: var(--mx-accent);
+  border-color: var(--mx-accent-dark);
+  color: #ffffff;
+}
+
+.bn-next { display: block; margin-top: 10px; }
+
+.bn-mission {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 2px dashed var(--mx-line);
+  background: var(--mx-softer);
+}
+
+.bn-mission-text {
+  margin: 0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: var(--mx-strong);
+}
+
+.bn-mission .mx-hint { margin-top: 8px; }
+
+.bn-mission-count {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--mx-sub);
+}
+
+/* 1관 우주 크기 상자 */
+.bn-scale {
+  margin: 12px 0;
+  padding: 16px 14px;
+  border-radius: 20px;
+  border: 3px solid #6366f1;
+  background: linear-gradient(135deg, #0b1020 0%, #1e1b4b 60%, #0f172a 100%);
+  color: #ffffff;
+  text-align: center;
+}
+
+.bn-scale p { margin: 4px 0; }
+.bn-scale-sub { font-family: 'Jua', 'Noto Sans KR', sans-serif; font-size: 1.1rem; color: #93c5fd; }
+.bn-scale-num {
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.9rem;
+  color: #fde047;
+  letter-spacing: 1px;
+  overflow-wrap: anywhere;
+}
+.bn-scale-name { font-family: 'Jua', 'Noto Sans KR', sans-serif; font-size: 1.3rem; color: #fbcfe8; }
+.bn-scale-desc { font-size: 0.95rem; line-height: 1.55; color: #cbd5e1; }
+
+/* 1관 조·억·만·일 네 묶음 */
+.bn-place-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.bn-group {
+  padding: 8px 6px;
+  border-radius: 14px;
+  border: 2px solid #e2e8f0;
+}
+
+.bn-group-0 { background: #fdf2f8; border-color: #fbcfe8; }
+.bn-group-1 { background: #f5f3ff; border-color: #ddd6fe; }
+.bn-group-2 { background: #e0f2fe; border-color: #bae6fd; }
+.bn-group-3 { background: #fefce8; border-color: #fde68a; }
+
+.bn-group-title {
+  margin: 0 0 6px;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1rem;
+  text-align: center;
+  color: #334155;
+}
+
+.bn-group-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.bn-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 52px;
+  padding: 4px 2px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.bn-cell-name { font-size: 0.78rem; font-weight: 700; color: #475569; white-space: nowrap; }
+.bn-cell-digit { font-family: 'Jua', 'Noto Sans KR', sans-serif; font-size: 1.25rem; color: #cbd5e1; }
+.bn-cell.is-zero .bn-cell-digit { color: #16a34a; }
+.bn-cell.active { background: #0284c7; border-color: #0369a1; }
+.bn-cell.active .bn-cell-name,
+.bn-cell.active .bn-cell-digit { color: #ffffff; }
+
+/* 2관 뛰어 세기 띠 */
+.bn-skip-title {
+  margin: 6px 0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.15rem;
+  text-align: center;
+  color: var(--mx-strong);
+}
+
+.bn-skip-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.bn-skip-card {
+  padding: 10px 4px;
+  border-radius: 12px;
+  border: 2px solid #0284c7;
+  background: #ffffff;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.1rem;
+  text-align: center;
+  color: #0369a1;
+  overflow-wrap: anywhere;
+}
+
+.bn-skip-card.blank { border-style: dashed; background: #fef9c3; color: #b45309; }
+.bn-skip-card.filled { background: #0284c7; color: #ffffff; }
+
+/* 3관 두 수 대결 */
+.bn-duel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.bn-duel-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: 14px;
+  border: 2px solid #16a34a;
+  background: #f0fdf4;
+  text-align: center;
+}
+
+.bn-duel-box.b { border-color: #2563eb; background: #eff6ff; }
+.bn-duel-label { font-size: 0.85rem; font-weight: 700; color: #475569; }
+.bn-duel-num { font-family: 'Jua', 'Noto Sans KR', sans-serif; font-size: 1.15rem; color: #1e293b; overflow-wrap: anywhere; }
+.bn-duel-kor { font-size: 0.82rem; font-weight: 700; color: #64748b; overflow-wrap: anywhere; }
+.bn-duel-sign { font-family: 'Jua', 'Noto Sans KR', sans-serif; font-size: 2rem; color: #e11d48; }
+
+.bn-duel-result {
+  margin: 0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.2rem;
+  text-align: center;
+  color: #e11d48;
+  overflow-wrap: anywhere;
+}

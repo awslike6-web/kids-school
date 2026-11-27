@@ -497,6 +497,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/subjects/math/js/fractions_decimals-core.js` (`window.FracDec3Core`, 순수 모듈): 소수는 0.1 단위 정수만(부동소수 없음). `decimalText`(7→`0.7`, 10→`1`)·`tenthsToken`(14→`1과 4/10`)·`barChoice`·`fractionType`(unit·proper·improper·mixed)·`pizzaTarget`·`typeQuestion(kind)`/`randomTypeQuestion`(진·가·대분수 이름, 단위분수 고르기)·`decimalTarget`·`wrongTenths`(시작 눈금이 0이 아니면 끝 눈금 오답 먼저)·`makeBar`.
 - `kids/subjects/math/js/fractions_decimals-labs.js` (`window.FracDec3Labs`): 1관 피자 분수·2관 분수의 이름·3관 0.1 수직선·4관 소수 막대 재기 + 퀴즈 배틀(`3-1`·`6. 분수와 소수`). 관마다 미션 3개를 맞히면 완료, 그 뒤에도 미션이 계속 나옴. `kids/css/math_fractions_decimals.css`(`mx-theme-fracdec3`).
 - 퀴즈 자료 `scripts/data/curriculum/math_3-1_6.json`(12제, Q01~Q06은 옛 번개 퀴즈를 3지선다로). 시험 `tests/math-fractions-decimals3.test.mjs`.
+
+### 🌌 4-1 큰 수 탐험관 (2026-11-28, 옛 화면을 공용 틀로)
+
+옛 `big_numbers.html`(592줄, 인라인 254줄·박힌 번개 퀴즈)을 공용 틀로 옮김(묶음 F2). 계단: ⬇ 2-2 네 자리 수 · ➡ 4-1 곱셈과 나눗셈.
+- `kids/subjects/math/js/big_numbers-core.js` (`window.BigNumCore`, 순수 모듈): `PLACES`(천조~일 16자리, 사실과 맞는 비유만)·`comma`(toLocaleString 안 씀)·`korean`(교과서 표기 `5억 4000만`, 조까지)·`placeIndex`·`placeName`(지수 → `천만의 자리`)·`digitRow`·`placeTarget`·`makeSkip(rng, step)`(1000·1만·100만·1억씩, 받아올림 없이 그 자리만 1씩, 오답은 ×10·÷10 걸음)·`makeCompare(rng, kind)`(`digits` 자릿수 다름 / `top` 가장 높은 자리 같고 그다음 다름, `diffPlace`).
+- `kids/subjects/math/js/big_numbers-labs.js` (`window.BigNumLabs`): 1관 자릿값 계수기(조·억·만·일 네 묶음 2×2, 자리 찾기 미션)·2관 뛰어 세기(빈칸 3지선다)·3관 크기 비교(기호 고정 순서 `fixed`) + 퀴즈 배틀(`4-1`·`1. 큰 수`). `kids/css/math_big_numbers.css`(`mx-theme-bignum4`).
+- 퀴즈 자료 `scripts/data/curriculum/math_4-1_1.json`(12제). 시험 `tests/math-big-numbers4.test.mjs`.
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
