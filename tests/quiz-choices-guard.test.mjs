@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PATTERN = /\b(?:choices|options)\s*\)?\s*\.\s*(?:map|forEach)\s*\(/;
-const EXCLUDE = new Set(['kids/data', 'kids/deprecated_backup', 'node_modules']);
+const EXCLUDE = new Set(['kids/data', 'node_modules']);
 const ALLOWLIST = {
   'kids/core/quiz-flow-controller.js': '부품 자신',
   'kids/js/english_phonics.js': '오답을 무작위로 뽑아 보기 생성',

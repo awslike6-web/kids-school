@@ -120,7 +120,7 @@ order.map((c, pos) => `<button data-choice-index="${c.index}">${pos + 1}. ${c.te
 
 ### 4단계 — 앞으로 만들 단원에도 강제되게
 1. **지킴이 시험** `tests/quiz-choices-guard.test.mjs`: `kids/` 아래 `.js`·`.html`에서 보기를 그리는 코드(`choices.map(`, `options.map(`, `choices.forEach(`, `options.forEach(` 등)가 있는 파일은 `QuizChoices`를 쓰거나, 시험 안 **허용 목록**에 사유와 함께 있어야 통과한다.
-   - 허용 목록 예: `quest-ui-renderer.js`(엔진이 이미 섞음), `*_voca.js`(무작위 오답 생성), `deprecated_backup/`, `legacy_backup/`, `kids/data/`.
+   - 허용 목록 예: `quest-ui-renderer.js`(엔진이 이미 섞음), `*_voca.js`(무작위 오답 생성), `kids/data/`.
    - 새 단원 화면을 만들면서 섞기를 빠뜨리면 이 시험이 실패한다.
 2. **등록 도구 경고**: `scripts/register_curriculum.py` `validate_seed`/`check_schema` 단계에서 해설·쓰임새에 보기 번호(`[1-5]번`, `①~⑤`, `보기 [1-5]`)가 있으면 **경고**한다(멈추지는 않음). `scripts/test_register_curriculum.py`에 시험 1건 추가.
 3. **노션 기존 문항 점검(읽기만)**: CURRICULUM_DB 전 과목, LIBRARY_DB `문제데이터`에서 해설에 보기 번호가 쓰인 행을 찾아 **목록만 보고**한다(쓰지 않음). 고칠지는 사용자 결정.

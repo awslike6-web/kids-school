@@ -70,3 +70,4 @@
 | :--- | :--- | :--- |
 | 2026-11-27 | 0 (목록) | 이 문서 작성 |
 | 2026-11-27 | A | `--add-missing`·빠진 자리 시험 추가, HTML 125개의 `?v=` 521곳 채움(하이드로젠 medium 초안, Claude 적용·검수). 버전 글자를 그대로 비교하던 시험 7개를 쿼리 무시로 고침 |
+| 2026-11-27 | B | `kids/data/legacy_backup/`(5개)·`kids/deprecated_backup/`(2개) 지움, 검사 제외 목록·주석 정리. 되살리기: `git checkout 2b7de65b -- kids/data/legacy_backup kids/deprecated_backup` |

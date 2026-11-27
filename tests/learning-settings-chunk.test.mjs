@@ -316,7 +316,7 @@ test('⑤ 통합 시험: 100조각 초과 및 함수 미로드 시 4곳 모두 �
 
 function walkFiles(dir, out = []) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-        if (['node_modules', '.git', 'tests', 'scratch', 'uploads', 'deprecated_backup'].includes(entry.name) || entry.name.startsWith('.')) continue;
+        if (['node_modules', '.git', 'tests', 'scratch', 'uploads'].includes(entry.name) || entry.name.startsWith('.')) continue;
         const full = path.join(dir, entry.name);
         if (entry.isDirectory()) walkFiles(full, out);
         else if (/\.(html|js)$/.test(entry.name)) out.push(full);

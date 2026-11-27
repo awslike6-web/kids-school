@@ -4,7 +4,7 @@
 // 💡 [클린 아키텍처 Headless CMS 원칙]
 // 전체 교육 콘텐츠는 노션 VOCA_DB 및 CURRICULUM_DB에서 실시간 동적 송출됩니다.
 // 본 파일은 네트워크 오프라인 시 UI 깨짐을 방어하기 위한 최소 스켈레톤 템플릿입니다.
-// 원본 대용량 데이터는 kids/data/legacy_backup/science-data.js에 영구 보존되어 있습니다.
+// 다이어트 전 원본 대용량 데이터는 git 기록에 있습니다: git show 2b7de65b:kids/data/legacy_backup/science-data.js (2026-11-27 백업 폴더 정리)
 
 const SCIENCE_CURRICULUM_DATA = [
   {

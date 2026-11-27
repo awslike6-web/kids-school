@@ -32,7 +32,7 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const STAMP_LENGTH = 8;
 const MAX_PASSES = 20;
-const SKIP_DIRS = new Set(['node_modules', 'deprecated_backup', '.git', 'archive']);
+const SKIP_DIRS = new Set(['node_modules', '.git', 'archive']);
 // `경로/파일명.js|css?v=값` — 경로 조각(주소 판별은 따로)
 const REF_RE = /([A-Za-z0-9_.\/-]*?)([A-Za-z0-9_.-]+\.(?:js|css))\?v=([A-Za-z0-9_.-]+)/g;
 // 로더 배열 `'파일명.js', '?v=값'`
