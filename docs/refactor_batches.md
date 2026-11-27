@@ -72,6 +72,10 @@
 
 
 ### E. 중복 도우미 합치기 — 현황판 카드 2번 (목록 Claude)
+- **조사 결과 (2026-11-28)**: 국어·사회·영어·과학 대문(`*_common.js`, 합계 약 2,800줄)에 같은 이름 함수가 15개 있지만, 본문 겹침은 0.06~0.5에 그친다(로딩 표시 0.5, 토론 마무리 0.72 외에는 과목마다 고쳐 쓴 다른 코드). 합치면 화면 동작이 바뀌므로 **억지로 합치지 않는다**. 대신 조사 중 찾은 버그를 고쳤다:
+  - 사회방 대문이 공용 `speakFairyTTS`·`stopFairyTTS`를 다시 정의해, 10-02부터 사회방 음성이 Edge(선희) 대신 브라우저 기계음이었다 → 지움, 시험 `tests/society-tts.test.mjs`(공용 음성 함수 덮어쓰기 금지)
+  - 국어·영어 로딩 문구에 보이던 「Fairy_」 오타
+- **남은 후보**: 공용 음성 대신 `speechSynthesis`를 직접 부르는 곳 7개(`voca_modal.js`, `english_phonics.js`, `math_factors_logic.js`, `math_number50.js`, `listen.html`, `haru_common.js`, `fractions_multiplication-core.js`) — 대체 경로인지 헌법 §6 위반인지 하나씩 확인할 것.
 - 과목 공통 파일(`korean_common.js` 783, `english_common.js` 772, `society_common.js` 794)과 수학 `*-core.js`에서 같은 일을 하는 함수(섞기·날짜·말풍선·보상 호출 등)를 찾아 공용으로 올린다.
 - 먼저 목록만 만들고, 합칠 것은 작은 묶음으로 다시 나눈다.
 
@@ -88,6 +92,7 @@
 | 2026-11-27 | 0 (목록) | 이 문서 작성 |
 | 2026-11-27 | A | `--add-missing`·빠진 자리 시험 추가, HTML 125개의 `?v=` 521곳 채움(하이드로젠 medium 초안, Claude 적용·검수). 버전 글자를 그대로 비교하던 시험 7개를 쿼리 무시로 고침 |
 | 2026-11-27 | B | `kids/data/legacy_backup/`(5개)·`kids/deprecated_backup/`(2개) 지움, 검사 제외 목록·주석 정리. 되살리기: `git checkout 2b7de65b -- kids/data/legacy_backup kids/deprecated_backup` |
+| 2026-11-28 | E | 같은 이름 함수 15개 비교 → 본문이 갈라져 합치지 않음. 사회방 음성이 기계음이던 버그(공용 함수 덮어쓰기) 고침, 「Fairy_」 오타, 덮어쓰기 금지 시험 |
 | 2026-11-28 | D3 | `science_report.js`(784줄) → 보고서 그리기 342줄 + `science_report_quiz.js` 469줄. 함께 쓰던 진행 상태 11개를 `ScienceReport._state` 한 객체로, 이름표 23개·전역 14개 그대로. 시험 `science-report-split.test.mjs` 5개, 폰 크기에서 3단원 보고서→미션 1 정답→미션 2 확인 |
 | 2026-11-28 | D2 | `quest-mastery.js`(792줄)의 문제 생성·한글 받침 분석 308줄을 `quest-questions.js`(333줄)로 그대로 옮김 → 엔진 521줄. 화면 3곳 태그 추가, 옛 HTML 캐시와 섞여도 엔진이 멈추지 않게 자가 삽입·지연 함수(카본 검토), 시험 `quest-questions-split.test.mjs` 6개, 옮기기 전후 같은 씨앗 문제 45개 같음 |
 | 2026-11-27 | D1 | 시간표 파서 두 벌(`notion-api-client.js` 안 사본 약 210줄 ↔ `notion-timetable.js`) → `notion-timetable.js` 한 벌(IIFE, 공개 9개 + `NotionTimetable`), 본문 읽기 4개는 api-client 한 벌. 사본에만 있던 정렬 수정을 옮겨 `timetable.html` 행 누락 위험도 고침. 시험 `notion-timetable.test.mjs` 5개. 카본 diff 검토 8개 중 3개 반영 |

@@ -225,7 +225,7 @@ function showLoadingSpinner(container) {
       <div class="spinner-wrapper">
         <div class="spinner-circle"></div>
         <p style="font-family:'Gaegu', cursive; font-size:1.3rem; font-weight:bold; color:inherit; text-align:center;">
-            Fairy_🧚‍♀️ 코코 요정이 자료를 챙겨오고 있어요...
+            🧚‍♀️ 코코 요정이 자료를 챙겨오고 있어요...
         </p>
       </div>
     `;

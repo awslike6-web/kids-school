@@ -7,31 +7,9 @@
 
 window.currentSubject = "사회"; // 전역 과목명 명시 (보상 및 학습일지 타겟용)
 
-// 🔊 요정 음성 제어 헬퍼
-function stopFairyTTS() {
-    if (typeof FairyEngine !== 'undefined' && typeof FairyEngine.stop === 'function') {
-        FairyEngine.stop();
-        return;
-    }
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-    }
-}
-
-function speakFairyTTS(text) {
-    if (!text) return;
-    if (typeof FairyEngine !== 'undefined' && typeof FairyEngine.speak === 'function') {
-        FairyEngine.speak(text);
-        return;
-    }
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'ko-KR';
-        utter.rate = 0.9;
-        window.speechSynthesis.speak(utter);
-    }
-}
+// 🔊 요정 음성은 공용 fairy-tts.js의 speakFairyTTS·stopFairyTTS를 그대로 쓴다 (화면이 이 파일보다 먼저 싣는다).
+// 2026-10-02~11-28 이 자리에 같은 이름 함수를 다시 정의해 공용 Edge 음성(선희)을 덮고, 없는 FairyEngine을 찾다가
+// 브라우저 기계음(speechSynthesis)으로 읽고 있었다 → 지움 (리팩토링 묶음 E, 시험 tests/society-tts.test.mjs).
 
 // 🔒 로컬 속성 상태
 let currentProfile = localStorage.getItem('currentUser') || 'son';
