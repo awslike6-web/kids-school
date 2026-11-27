@@ -18,6 +18,7 @@ const ALLOWLIST = {
   'kids/js/society_voca.js': '오답을 무작위로 뽑아 보기 생성',
   'kids/subjects/math/js/congruence_symmetry-quiz.js': '자체 Fisher-Yates ui.shuffle',
   'kids/subjects/math/js/clock_rules_logic.js': '수학 공통 MathQuizEngine.shuffleArray(Fisher-Yates)로 섞음',
+  'kids/js/science_report_quiz.js': 'science_report.js getArrangedItems(QuizChoices.arrange)로 섞음 (묶음 D3에서 퀴즈만 떼어 냄)',
   'kids/subjects/quest/quest-runner.js': '5분 퀘스트 엔진 withShuffledOptions가 섞음',
   'kids/subjects/quest/quest-ui-renderer.js': '5분 퀘스트 엔진 withShuffledOptions가 섞음',
   'kids/subjects/quest/quest_engine.js': 'withShuffledOptions 정의',

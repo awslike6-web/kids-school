@@ -514,6 +514,7 @@ test('B3 science_report.js: 객관식·빈칸 카드를 섞고 빈칸 채우기 
   vm.createContext(sandbox);
   vm.runInContext(readFileSync(new URL('../kids/core/quiz-flow-controller.js', import.meta.url), 'utf8'), sandbox);
   vm.runInContext(readFileSync(new URL('../kids/js/science_report.js', import.meta.url), 'utf8'), sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/js/science_report_quiz.js', import.meta.url), 'utf8'), sandbox); // 퀴즈는 따로 (묶음 D3)
 
   // 빈칸 문제 섞기 + 카드 선택 후 순서 유지
   sandbox.ScienceReport.renderUI(reportContainer, 'quiz', 1);

@@ -59,7 +59,7 @@
   | :--- | ---: | :--- |
   | `kids/core/notion-api-client.js` | 800 | **D1 끝**: 시간표 파서가 `notion-timetable.js`와 두 벌이었음 → 한 벌로(590줄) |
   | `kids/subjects/quest/quest-mastery.js` | 792 | **D2 끝**: 문제 생성·한글 분석을 `quest-questions.js`로 (521줄) |
-  | `kids/js/science_report.js` | 784 | **D3 후보**: 보고서 그리기(약 300줄)와 퀴즈(빈칸·선택·순서·별점, 약 390줄)가 섞임 |
+  | `kids/js/science_report.js` | 784 | **D3 끝**: 보고서 그리기 342줄 + `science_report_quiz.js` 469줄 |
   | `kids/js/society_common.js`·`korean_common.js`·`english_common.js` | 772~794 | **→ 묶음 E**: 세 과목방 대문이 같은 뼈대(방 열기·학년/단원 고르기·미션 시작·보상)를 각자 복사 |
   | `kids/subjects/math/fractions_decimals.html` | 770 | **→ 묶음 F**: 공용 탐험관 틀 이전의 옛 화면(인라인 스크립트 413줄) |
   | `minseo_lab.html` | 780 | 살펴볼 것: 인라인 스크립트 241줄·스타일 51줄 — 파일로 빼면 줄지만 급하지 않음 |
@@ -88,6 +88,7 @@
 | 2026-11-27 | 0 (목록) | 이 문서 작성 |
 | 2026-11-27 | A | `--add-missing`·빠진 자리 시험 추가, HTML 125개의 `?v=` 521곳 채움(하이드로젠 medium 초안, Claude 적용·검수). 버전 글자를 그대로 비교하던 시험 7개를 쿼리 무시로 고침 |
 | 2026-11-27 | B | `kids/data/legacy_backup/`(5개)·`kids/deprecated_backup/`(2개) 지움, 검사 제외 목록·주석 정리. 되살리기: `git checkout 2b7de65b -- kids/data/legacy_backup kids/deprecated_backup` |
+| 2026-11-28 | D3 | `science_report.js`(784줄) → 보고서 그리기 342줄 + `science_report_quiz.js` 469줄. 함께 쓰던 진행 상태 11개를 `ScienceReport._state` 한 객체로, 이름표 23개·전역 14개 그대로. 시험 `science-report-split.test.mjs` 5개, 폰 크기에서 3단원 보고서→미션 1 정답→미션 2 확인 |
 | 2026-11-28 | D2 | `quest-mastery.js`(792줄)의 문제 생성·한글 받침 분석 308줄을 `quest-questions.js`(333줄)로 그대로 옮김 → 엔진 521줄. 화면 3곳 태그 추가, 옛 HTML 캐시와 섞여도 엔진이 멈추지 않게 자가 삽입·지연 함수(카본 검토), 시험 `quest-questions-split.test.mjs` 6개, 옮기기 전후 같은 씨앗 문제 45개 같음 |
 | 2026-11-27 | D1 | 시간표 파서 두 벌(`notion-api-client.js` 안 사본 약 210줄 ↔ `notion-timetable.js`) → `notion-timetable.js` 한 벌(IIFE, 공개 9개 + `NotionTimetable`), 본문 읽기 4개는 api-client 한 벌. 사본에만 있던 정렬 수정을 옮겨 `timetable.html` 행 누락 위험도 고침. 시험 `notion-timetable.test.mjs` 5개. 카본 diff 검토 8개 중 3개 반영 |
 | 2026-11-27 | C | 요정 묶음 순서 한 벌 `config.js` `FAIRY_CORE_CHAIN`, 동적 목록 4곳이 펼쳐 씀(로비 engine↔catalog 순서 바로잡음·요정 파일 캐시됨), 태그 순서 12화면 바로잡음, 엔진 자가 삽입 경고, `tests/fairy-chain.test.mjs`(네온 medium 초안). 설계 검토 카본·네온 |

@@ -207,6 +207,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "parent_dashboard_render.js", "path": "kids-school-main/kids/js/parent_dashboard_render.js", "domain": ["quest"], "docs": ["learning_settings_chunk_spec.md", "CORE_CATALOG.md"]},
       {"name": "science_common.js", "path": "kids-school-main/kids/js/science_common.js", "domain": ["science"], "docs": ["learning_record_spec.md", "science_spec.md", "CORE_CATALOG.md"]},
       {"name": "science_lab.js", "path": "kids-school-main/kids/js/science_lab.js", "domain": ["science"], "docs": ["learning_record_spec.md", "quiz_choice_shuffle_spec.md", "science_spec.md"]},
+      {"name": "science_report_quiz.js", "path": "kids-school-main/kids/js/science_report_quiz.js", "domain": ["science"], "docs": ["CORE_CATALOG.md", "refactor_batches.md"]},
       {"name": "science_safety.js", "path": "kids-school-main/kids/js/science_safety.js", "domain": ["science"], "docs": ["quiz_choice_shuffle_spec.md", "science_spec.md", "CORE_CATALOG.md"]},
       {"name": "science_storybook.js", "path": "kids-school-main/kids/js/science_storybook.js", "domain": ["science"], "docs": ["science_spec.md", "CORE_CATALOG.md"]},
       {"name": "science_voca.js", "path": "kids-school-main/kids/js/science_voca.js", "domain": ["science"], "docs": ["learning_record_spec.md", "science_spec.md", "CORE_CATALOG.md"]},

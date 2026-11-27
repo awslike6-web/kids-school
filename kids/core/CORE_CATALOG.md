@@ -1104,7 +1104,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ### 🌟 `science_report.js` ([4단계] 『실험관찰』 실험연계 디지털 탐구 보고서 & 서술형 빌더 전담 엔진)
 1~N단원 플러그앤플레이(`window['SCIENCE_LAB_REPORT_' + unitId + '_DATA']` 및 `UNIT_THEME_DEFAULTS`) 구조로 교과서 『실험관찰』 실험연계 요약 노트(`conceptTables` 비교표, `summaryDoc` 실험 상세 분석, `hasEquilibriumGraph`·`diagramHtml` SVG 도해, `specialDeepDive` 심화 탐구, 가상 실험실 바로가기)와 참여형 탐구 미션(서술형 문장 조립 빌더·채점기준 가이드, 객관식 추론, 섞인 실험 순서 직접 조립기, 인터랙티브 별점 체크리스트), 완주 보상(+5💎)을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/science_report.js` (743줄)
+- **파일 위치**: `kids/js/science_report.js` (342줄, 보고서 그리기·단원 열기) + `kids/js/science_report_quiz.js` (469줄, 실전 퀴즈: 빈칸·객관식·순서 조립·별점·완료 보상). 2026-11-28 리팩토링 묶음 D3에서 나눴다. 함께 쓰는 진행 상태는 `ScienceReport._state` 한 객체, 보고서 도우미는 `ScienceReport._helpers`. 싣는 순서: 보고서 → 퀴즈(퀴즈를 먼저 실으면 오류로 알림). 이름표 23개·전역 14개는 예전과 같음, 시험 `tests/science-report-split.test.mjs`.
 - **실험 카드 선택 필드**: `summaryDoc` 항목의 `process`·`result`·`conclusion`·`think`는 값이 있을 때만 그립니다. `points` 배열이 있으면 글머리표 목록으로 그리고, 쪽수는 `page`가 없으면 `bookRef`를 씁니다. `specialDeepDive`의 `badge`·`subtitle`은 선택이며, 본문은 `description`이 없으면 `intro`를 씁니다.
 - **핵심 API**:
   | 메서드 | 설명 |

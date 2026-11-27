@@ -116,7 +116,7 @@ test('과학 안전수칙: 노션 문항은 c:page_id, 예비 자료는 s:sci-sa
 });
 
 test('과학 탐구 보고서: 정적 자료는 s:sci-report-<단원>:<문항 번호>, 틀린 보기를 남긴다', () => {
-  const { sb } = sandbox(['kids/js/science_report.js']);
+  const { sb } = sandbox(['kids/js/science_report.js', 'kids/js/science_report_quiz.js']);
   sb.document.getElementById = () => fakeEl();
   sb.SCIENCE_LAB_REPORT_DATA = { quizItems: [{ type: 'choice', choices: ['혼합물', '순물질'], answer: 0, explanation: '' }] };
   sb.ScienceReport.submitChoiceQuiz(0, 1);
@@ -129,7 +129,7 @@ test('과학 탐구 보고서: 정적 자료는 s:sci-report-<단원>:<문항 �
 });
 
 test('과학 탐구 보고서: 빈칸을 다 채우지 않은 제출은 오답으로 세지 않는다', () => {
-  const { sb } = sandbox(['kids/js/science_report.js']);
+  const { sb } = sandbox(['kids/js/science_report.js', 'kids/js/science_report_quiz.js']);
   sb.document.getElementById = () => fakeEl();
   sb.SCIENCE_LAB_REPORT_DATA = { quizItems: [{ type: 'blank', blanks: [{ id: 'b1', answer: '증발', target: '물' }, { id: 'b2', answer: '응결', target: '김' }], options: ['증발', '응결'], explanation: '' }] };
   sb.ScienceReport.selectBlankWord('증발');
