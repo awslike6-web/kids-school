@@ -510,10 +510,36 @@
     renderParentProgressChips();
   }
 
-  // 11. 클라우드 노션 동기화
-  async function syncParentProgressToCloud() {
-    const isCurrentMinseoLocal = (typeof window.isMinseo !== 'undefined') ? window.isMinseo : false;
-    const childName = isCurrentMinseoLocal ? '민서' : '민수';
+  // 11. 클라우드 노션 동기화 (2026-11-28 묶음 G: 아이마다 자기 줄에 자기 몫만)
+  // 예전에는 「지금 프로필 아이」 줄에 두 아이 몫을 통째로 써서, 민서 프로필에서 고친 민수 진도가 민수 줄에 닿지 않았다.
+  // 이제는 이번에 바뀐 아이(아무도 안 바뀌었으면 지금 프로필 아이)를 각자 자기 줄에 `questSettings: { 그 아이 키: 값 }`으로 쓴다.
+  const CHILD_NAMES = { minsu: '민수', minseo: '민서' };
+  const cloneSettings = v => JSON.parse(JSON.stringify(v || {}));
+  // 마지막으로 노션과 맞춘 값 (화면을 연 때 값 → 저장에 성공할 때마다 갱신). 바뀐 과목을 가려내는 기준
+  const lastSynced = {
+    minsu: cloneSettings(currentParentSettings.minsu),
+    minseo: cloneSettings(currentParentSettings.minseo)
+  };
+
+  // 이 기기에서 바뀐 칸만 { 칸: 새 값 }
+  function changedFields(childKey) {
+    const now = currentParentSettings[childKey] || {};
+    const before = lastSynced[childKey] || {};
+    const out = {};
+    Object.keys(now).forEach(k => {
+      if (JSON.stringify(now[k]) !== JSON.stringify(before[k])) out[k] = cloneSettings({ v: now[k] }).v;
+    });
+    return out;
+  }
+
+  // 캐시에 쓸 만한 설정이 있는지 (없으면 노션을 먼저 읽어 다른 칸이 지워지지 않게)
+  function hasUsableSettings(obj) {
+    return Object.keys(obj).some(k => k !== 'updatedAt' && k !== 'quizFlow');
+  }
+
+  // value: 저장 시점에 떠 둔 그 아이 진도, changes: 이 기기에서 바뀐 칸
+  async function syncChildQuestSettings(childKey, isOwnProfile, value, changes) {
+    const childName = CHILD_NAMES[childKey];
     const proxyUrl = "https://minmin-notion.awslike6.workers.dev";
     const invDbId = "374a27115b688042bb61e6a102242e12";
     try {
@@ -532,28 +558,53 @@
           }
         }
       }
-      if (!pageId) return;
+      if (!pageId) return false;
 
       let currentCloud = {};
       try {
         const cachedRaw = localStorage.getItem(`MINMIN_CLOUD_SETTINGS_${childName}`) || "{}";
         currentCloud = JSON.parse(cachedRaw);
-        if (typeof currentCloud !== 'object' || currentCloud === null) currentCloud = {};
+        if (typeof currentCloud !== 'object' || currentCloud === null || Array.isArray(currentCloud)) currentCloud = {};
       } catch (e) {
         currentCloud = {};
       }
+      // 다른 아이 줄은 이 기기 캐시가 낡았을 수 있어 늘 노션을 새로 읽는다. 내 줄도 캐시가 비었으면 읽는다.
+      let nextValue = value;
+      if (!isOwnProfile || !hasUsableSettings(currentCloud)) {
+        const pageRes = await fetch(`${proxyUrl}/v1/pages/${pageId}?force=true`, { cache: 'no-store' });
+        const page = pageRes.ok ? await pageRes.json() : null;
+        const prop = page && page.properties ? page.properties['학습설정'] : null;
+        if (!prop || !Array.isArray(prop.rich_text)) {
+          console.warn(`⚠️ [5분 퀘스트 진도 저장 보류] ${childName} 학습설정을 읽지 못해 덮어쓰지 않습니다 (로컬만 저장됨).`);
+          return false;
+        }
+        const text = prop.rich_text.map(t => t.plain_text || t.text?.content || '').join('');
+        currentCloud = {};
+        if (text) {
+          try {
+            const base = JSON.parse(text);
+            if (!base || typeof base !== 'object' || Array.isArray(base)) throw new Error('학습설정이 객체가 아님');
+            currentCloud = base;
+          } catch (e) {
+            console.warn(`⚠️ [5분 퀘스트 진도 저장 보류] ${childName} 학습설정을 해석하지 못해 덮어쓰지 않습니다.`);
+            return false;
+          }
+        }
+        // 노션에 그 아이 진도가 있으면 그 위에 이 기기에서 바꾼 과목만 얹는다 (안 고친 과목을 이 기기의 기본값·옛 값으로 되돌리지 않게)
+        const remote = currentCloud.questSettings && currentCloud.questSettings[childKey];
+        if (remote && typeof remote === 'object' && !Array.isArray(remote)) nextValue = { ...remote, ...changes };
+      }
 
-      currentCloud.questSettings = currentParentSettings;
+      currentCloud.questSettings = { [childKey]: nextValue };
       currentCloud.updatedAt = new Date().toISOString();
       const jsonStr = JSON.stringify(currentCloud);
-      localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, jsonStr);
 
       if (typeof chunkLearningSettingsRichText !== 'function') {
         console.warn('⚠️ [학습설정 저장 중단] 나눔 함수(chunkLearningSettingsRichText)가 로드되지 않았습니다 (로컬만 저장됨).');
-        return;
+        return false;
       }
       const richTextChunks = chunkLearningSettingsRichText(jsonStr);
-      if (!richTextChunks) return;
+      if (!richTextChunks) return false;
 
       const patchRes = await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
         method: "PATCH",
@@ -566,13 +617,34 @@
           }
         })
       });
-      if (patchRes.ok) {
-        console.log(`☁️ [5분 퀘스트 진도 노션 저장 성공] ${childName}:`, currentParentSettings);
-      } else {
+      if (!patchRes.ok) {
         console.warn(`⚠️ [5분 퀘스트 진도 노션 저장 실패] HTTP ${patchRes.status}`);
+        return false;
       }
+      // 노션에 들어간 뒤에만 캐시·화면 값을 맞춘다 (실패하면 다음 저장 때 다시 보낼 수 있게)
+      localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, jsonStr);
+      currentParentSettings[childKey] = cloneSettings(nextValue);
+      lastSynced[childKey] = cloneSettings(nextValue);
+      try { localStorage.setItem('MINMIN_QUEST_SETTINGS', JSON.stringify(currentParentSettings)); } catch (e) {}
+      console.log(`☁️ [5분 퀘스트 진도 노션 저장 성공] ${childName}:`, nextValue);
+      return true;
     } catch (err) {
       console.warn("⚠️ [5분 퀘스트 진도 노션 저장 통신 에러]:", err);
+    }
+    return false;
+  }
+
+  // 바뀐 아이만 (안 고친 아이 값을 이 기기의 낡은 값으로 되돌리지 않게). 아무것도 안 바뀌었으면 지금 프로필 아이만.
+  async function syncParentProgressToCloud() {
+    const isCurrentMinseoLocal = (typeof window.isMinseo !== 'undefined') ? window.isMinseo : false;
+    const ownKey = isCurrentMinseoLocal ? 'minseo' : 'minsu';
+    const jobs = ['minsu', 'minseo']
+      .map(k => ({ childKey: k, changes: changedFields(k), value: cloneSettings(currentParentSettings[k]) }))
+      .filter(j => Object.keys(j.changes).length > 0);
+    if (jobs.length === 0) jobs.push({ childKey: ownKey, changes: {}, value: cloneSettings(currentParentSettings[ownKey]) });
+    jobs.sort((a, b) => (a.childKey === ownKey ? -1 : 0) - (b.childKey === ownKey ? -1 : 0));
+    for (const j of jobs) {
+      await syncChildQuestSettings(j.childKey, j.childKey === ownKey, j.value, j.changes);
     }
   }
 

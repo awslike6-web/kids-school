@@ -359,7 +359,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "tri_quad-labs.js", "path": "kids-school-main/kids/subjects/math/js/tri_quad-labs.js", "domain": ["math"], "docs": ["math_4-2_shapes_spec.md", "CORE_CATALOG.md"]},
       {"name": "monster_lab_controller.js", "path": "kids-school-main/kids/subjects/quest/monster_lab_controller.js", "domain": ["quest"], "docs": ["gallery_character_runner_spec.md", "monster_rotek_spec.md", "runner_friendship_spec.md"]},
       {"name": "monster_roster.js", "path": "kids-school-main/kids/subjects/quest/monster_roster.js", "domain": ["quest"], "docs": ["family_yacht_spec.md", "family_yut_ui_spec.md", "gallery_archive_spec.md"]},
-      {"name": "parent_progress_controller.js", "path": "kids-school-main/kids/subjects/quest/parent_progress_controller.js", "domain": ["quest"], "docs": ["learning_settings_chunk_spec.md", "CORE_CATALOG.md"]},
+      {"name": "parent_progress_controller.js", "path": "kids-school-main/kids/subjects/quest/parent_progress_controller.js", "domain": ["quest"], "docs": ["learning_settings_chunk_spec.md", "CORE_CATALOG.md", "notion_schemas_school.md"]},
       {"name": "quest-questions.js", "path": "kids-school-main/kids/subjects/quest/quest-questions.js", "domain": ["quest"], "docs": ["refactor_batches.md"]},
       {"name": "quest-runner-ui.js", "path": "kids-school-main/kids/subjects/quest/quest-runner-ui.js", "domain": ["quest"], "docs": ["CORE_CATALOG.md"]},
       {"name": "science_season_airmass_lab.js", "path": "kids-school-main/kids/subjects/science/js/science_season_airmass_lab.js", "domain": ["science"], "docs": ["quiz_choice_shuffle_spec.md"]}

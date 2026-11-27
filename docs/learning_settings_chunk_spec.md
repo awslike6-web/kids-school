@@ -39,7 +39,7 @@ Worker는 학습설정을 쓰지 않는다. `.local-tools/review-parent-change.m
 5. 명세 갱신: `docs/notion_schemas_school.md` 학습설정 행에 「여러 조각, 읽을 때 이어 붙임」 한 줄.
 
 ## 4. 하지 않을 것
-- 다른 아이 몫이 같이 저장되는 중복(`questSettings`에 두 아이 몫, `screenTime.minseo`)은 **이번에 줄이지 않는다.** 옮기기(migration)가 필요해 따로 다룬다.
+- 다른 아이 몫이 같이 저장되는 중복(`questSettings`에 두 아이 몫, `screenTime.minseo`)은 **이번에 줄이지 않는다.** 옮기기(migration)가 필요해 따로 다룬다. → 2026-11-28 리팩토링 묶음 G에서 정리함(`docs/refactor_batches.md` G).
 - 「캐시를 읽고 → 통째로 덮어쓰기」 구조(동시 저장 시 덮어쓸 위험)는 바꾸지 않는다. 눈에 띄면 보고만 한다.
 - 노션 스키마·Worker는 건드리지 않는다.
 
