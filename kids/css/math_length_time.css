@@ -1,169 +1,133 @@
+/* 초등 3학년 길이와 시간 탐험관 전용 스타일 (공용 틀 math_explorer.css 위에 얹음, 2026-11-28 묶음 F7) */
+body.mx-theme-lentime3 {
+  --mx-head-a: #fefce8;
+  --mx-head-b: #ffe4e6;
+  --mx-line: #fcd34d;
+  --mx-strong: #854d0e;
+  --mx-sub: #be123c;
+  --mx-accent: #d97706;
+  --mx-accent-dark: #b45309;
+  --mx-soft: #fef3c7;
+  --mx-softer: #fffbeb;
+}
 
-    /* 돋보기 자(Ruler) 측정 뷰 */
-    .ruler-container {
-      background: #ffffff;
-      border: 3px solid #e2e8f0;
-      border-radius: 20px;
-      padding: 22px 18px;
-      margin: 15px auto;
-      max-width: 580px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      text-align: center;
-    }
-    .ruler-svg-wrap {
-      width: 100%;
-      overflow-x: auto;
-      padding: 10px 0;
-      display: flex;
-      justify-content: center;
-    }
-    .ruler-svg-wrap svg {
-      width: 100%;
-      max-width: 540px;
-      height: auto;
-    }
+.lt-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 12px;
+}
 
-    /* 단위 환산 상자 */
-    .unit-exchange-card {
-      background: #fdfbf7;
-      border: 2px dashed #0284c7;
-      border-radius: 16px;
-      padding: 16px;
-      margin-top: 12px;
-      font-family: 'Jua', sans-serif;
-      font-size: 1.25rem;
-      color: #1e293b;
-      line-height: 1.8;
-      text-align: left;
-    }
+.lt-next { display: block; margin-top: 8px; }
 
-    /* 🪐 동적 우주 활주로 캔버스 */
-    .space-canvas-box {
-      background: linear-gradient(135deg, #090d16 0%, #1e1b4b 50%, #0f172a 100%);
-      border: 3px solid #6366f1;
-      border-radius: 20px;
-      padding: 15px 10px;
-      margin: 15px auto;
-      max-width: 580px;
-      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
-      position: relative;
-      overflow: hidden;
-      text-align: center;
-    }
-    .space-svg-wrap {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .space-svg-wrap svg {
-      width: 100%;
-      max-width: 560px;
-      height: auto;
-    }
+.lt-mission-text {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 2px dashed var(--mx-line);
+  background: var(--mx-softer);
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.15rem;
+  color: var(--mx-strong);
+}
 
-    /* 태양계 우주 탐사선 카드 그리드 */
-    .space-planet-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 10px;
-      margin: 15px 0;
-    }
-    .planet-btn-card {
-      background: #ffffff;
-      border: 2px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 12px 8px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
-    }
-    .planet-btn-card:hover, .planet-btn-card.active {
-      transform: translateY(-3px);
-      border-color: #8b5cf6;
-      background: #f5f3ff;
-      box-shadow: 0 8px 16px rgba(139, 92, 246, 0.2);
-    }
-    .planet-icon { font-size: 2.2rem; margin-bottom: 4px; }
-    .planet-name { font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #1e293b; font-weight: bold; }
-    .planet-dist-tag { font-size: 0.82rem; color: #7c3aed; font-weight: 700; }
+.lt-mission-count {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--mx-sub);
+}
 
-    /* ⏱️ 실전 스톱워치 챌린지 상자 */
-    .stopwatch-challenge-box {
-      background: #ffffff;
-      border: 3px solid #f43f5e;
-      border-radius: 24px;
-      padding: 22px;
-      margin: 15px auto;
-      max-width: 560px;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(244, 63, 94, 0.15);
-      position: relative;
-    }
-    .stopwatch-digital-clock {
-      font-family: 'Jua', sans-serif;
-      font-size: 3.2rem;
-      color: #e11d48;
-      background: #fff1f2;
-      border: 2px solid #fecdd3;
-      border-radius: 20px;
-      padding: 12px 24px;
-      display: inline-block;
-      margin: 12px 0;
-      letter-spacing: 2px;
-      min-width: 260px;
-      box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .stopwatch-btn-group {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 15px;
-    }
-    .stopwatch-action-btn {
-      font-family: 'Jua', sans-serif;
-      font-size: 1.3rem;
-      padding: 12px 28px;
-      border-radius: 30px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .stopwatch-action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
-    .btn-timer-start { background: linear-gradient(135deg, #10b981, #059669); }
-    .btn-timer-stop { background: linear-gradient(135deg, #f43f5e, #be123c); }
-    .btn-timer-reset { background: linear-gradient(135deg, #64748b, #475569); }
+.lt-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
 
-    /* ⏱️ 플로팅 미니 타이머 캡슐 */
-    .floating-timer-capsule {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: rgba(15, 23, 42, 0.92);
-      border: 2px solid #f43f5e;
-      color: #fff;
-      border-radius: 40px;
-      padding: 10px 20px;
-      font-family: 'Jua', sans-serif;
-      font-size: 1.15rem;
-      display: none;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-      z-index: 999;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      animation: pulseGlow 1.5s infinite alternate;
-    }
-    @keyframes pulseGlow {
-      from { box-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
-      to { box-shadow: 0 0 25px rgba(244, 63, 94, 0.8); }
-    }
-  
+/* 자 */
+.lt-ruler-board { max-width: 420px; margin: 4px auto 0; }
+.lt-ruler { fill: #fef08a; stroke: #ca8a04; stroke-width: 2; }
+.lt-tick { stroke: #a16207; stroke-width: 1.2; }
+.lt-tick-cm { stroke: #713f12; stroke-width: 2; }
+.lt-cm-label { font-family: 'Jua', 'Noto Sans KR', sans-serif; font-size: 13px; fill: #713f12; }
+.lt-cm-big { font-size: 17px; }
+.lt-bar { fill: #f43f5e; stroke: #be123c; stroke-width: 2; }
+.lt-edge { stroke: #e11d48; stroke-width: 1.5; stroke-dasharray: 4 3; }
+
+.lt-zoom-btn { align-self: center; }
+
+.lt-zoom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.lt-zoom-box {
+  padding: 6px;
+  border-radius: 14px;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.lt-zoom-label {
+  margin: 0 0 2px;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 0.95rem;
+  text-align: center;
+  color: #475569;
+}
+
+.lt-zoom-board { width: 100%; max-width: 380px; margin: 0 auto; }
+
+/* 단위 표 */
+.lt-unit-table {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.lt-unit-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  border-radius: 12px;
+  background: var(--mx-soft);
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  color: var(--mx-strong);
+}
+
+.lt-unit-big { font-size: 1.25rem; }
+.lt-unit-eq { font-size: 0.9rem; color: #64748b; }
+.lt-unit-small { font-size: 1.1rem; }
+
+/* 초시계 */
+.lt-watch {
+  margin: 12px auto 4px;
+  padding: 14px 10px;
+  max-width: 280px;
+  border-radius: 18px;
+  background: #1e293b;
+  color: #fef3c7;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.6rem;
+  text-align: center;
+}
+
+.lt-watch.is-running { box-shadow: 0 0 0 4px var(--mx-line); }
+
+.lt-peek {
+  display: block;
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.lt-go { min-width: 160px; font-size: 1.15rem; }

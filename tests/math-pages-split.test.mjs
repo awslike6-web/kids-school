@@ -1,4 +1,4 @@
-// 수학 페이지 분리 규칙: 상대 경로·줄 상한·인라인 금지·로드 순서·HTML 호출 함수 선언·core 단독 실행.
+// 수학 페이지 분리 규칙 (길이와 시간 화면은 2026-11-28 공용 탐험관 틀로 옮겨 tests/math-length-time3.test.mjs가 맡음): 상대 경로·줄 상한·인라인 금지·로드 순서·HTML 호출 함수 선언·core 단독 실행.
 // 2026-11-14: 얼린 원본(tests/fixtures/math-split)과의 원문·마크업 통째 대조는 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,8 +12,7 @@ const pages = [
     ['fractions_multiplication', 'math_fractions_multiplication.css', true],
     ['fractions_training', 'math_fractions_training.css', true],
     ['math_operator_studio', 'math_operator_studio.css', ['math_operator_studio-plans.js', 'math_operator_studio-core.js', 'math_operator_studio-blocks.js', 'math_operator_studio-numberline.js', 'math_operator_studio-main.js']],
-    ['ranges_estimation', 'math_ranges_estimation.css', true],
-    ['length_time', 'math_length_time.css', false]
+    ['ranges_estimation', 'math_ranges_estimation.css', true]
 ];
 
 for (const [name, cssName, split] of pages) {

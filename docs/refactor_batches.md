@@ -92,7 +92,9 @@
   | F4 | `planar_shapes` 평면도형 | 3-1 2단원 | 420(177) | **끝** (관 3개 + 노션 퀴즈 12제) |
   | F5 | `shape_movement` 도형의 이동 | 4-1 4단원 | 481(172) | **끝** (관 4개 + 노션 퀴즈 12제) |
   | F6 | `angles_concept` 각도 | 4-1 2단원 | 213 + JS 532 | **끝** (관 4개 + 노션 퀴즈 12제) |
-  | F7 | `length_time` 길이와 시간 | 3-1 5단원 | 238 + JS 532 | 다음 |
+  | F7 | `length_time` 길이와 시간 | 3-1 5단원 | 238 + JS 532 | **끝** (관 4개 + 노션 퀴즈 12제) |
+
+  묶음 F 일곱 화면 모두 끝(2026-11-28).
 
   방학 뒤로 미룸(아이가 이번 학기에 쓰는 중): 민수 5-2 `ranges_estimation`·`fractions_multiplication`·`fractions_training`·`congruence_symmetry`, 민서 1-2 `shapes`·`clock_rules`·`addition_subtraction_concept`·`number50`.
 - **옮기는 틀**: 옛 활동은 그대로 관으로(다시 설계하지 않음), 관마다 미션 3개로 완료, 박힌 퀴즈는 `scripts/data/curriculum/math_{학년}_{단원}.json` → `register_curriculum.py`로 노션에, 순수 계산은 `{화면}-core.js`(시험), 관은 `{화면}-labs.js`.
@@ -110,6 +112,7 @@
 | 2026-11-28 | F4 | `planar_shapes.html`(420줄, 인라인 177줄) → 틀 래퍼 71줄 + `planar_shapes-core.js`·`-labs.js`·CSS. 관 3개(선의 3총사·각과 직각·도형 3총사) 무작위 미션, 맞히면 직각 표시. 노션 3-1 `2. 평면도형` 12행 등록(미리보기 경고 확인 후). 시험 `math-planar-shapes3.test.mjs` 6개, 폰 크기에서 1~3관 완료·완주 창·퀴즈 배틀 확인 |
 | 2026-11-28 | F5 | `shape_movement.html`(481줄, 인라인 172줄) → 틀 래퍼 71줄 + `shape_movement-core.js`·`-labs.js`·CSS. 관 4개(밀기·뒤집기·돌리기·무늬 꾸미기), 대칭 없는 F 모양을 칸 좌표로 계산. 확인 중 무늬 규칙 두 개(pinwheel·diagonal)가 같은 무늬를 내던 것 고치고 규칙별 무늬가 다른지 시험 추가. 노션 4-1 `4. 평면도형의 이동` 12행 등록(Q10 「4번」을 「네 번」으로 고친 뒤). 시험 `math-shape-movement4.test.mjs` 10개, 폰 크기에서 1~4관 완료·완주 창·퀴즈 배틀 확인 |
 | 2026-11-28 | F6 | `angles_concept.html`(213줄) + `js/angles_concept.js`(532줄) → 틀 래퍼 71줄 + `angles_concept-core.js`·`-labs.js`·CSS(같은 이름 새 내용), 옛 JS 지움. 관 4개(각도기 읽기·각 만들기·삼각형 세 각·사각형 네 각), 적힌 각대로 꼭짓점 계산. 확인 중 10°처럼 좁은 각에서 변이 눈금 숫자를 가림 → 20°~160°·숫자를 변 위에, 가는 삼각형(90°·70°·20°)에서 각 숫자가 다른 꼭짓점 쪽에 찍힘 → 가장 작은 각 30° 이상·표시 거리를 변 길이에 맞춤. 「평각」 분류 뺌. 노션 4-1 `2. 각도` 12행 등록. 시험 `math-angles-concept4.test.mjs` 10개(옛 `math-pages-split2`에서 각도 화면 뺌), 폰 크기에서 1~4관 완료·완주 창·퀴즈 배틀 확인 |
+| 2026-11-28 | F7 | `length_time.html`(238줄) + `js/length_time.js`(532줄) → 틀 래퍼 71줄 + `length_time-core.js`·`-labs.js`·CSS(같은 이름 새 내용), 옛 JS 지움. 관 4개(자로 재기·단위 바꾸기·1초 감각·시간 계산). 옛 「태양계 행성 거리」는 축척이 섞여 사실과 맞지 않아 빼고 km·m 바꾸기로. 확인 중 찾은 것: 받아내림 뺄셈에서 오답 둘이 같은 글이 되어 보기가 2개만 나옴 → 다른 오답 채움, 「3분 − 3분 = 0분」 해설 → 답의 분이 늘 1 이상, 돋보기 칸이 두 칸으로 나뉘어 오히려 작음 → 한 줄씩 크게. 퀴즈 자료도 정답과 값이 같은 꼴(「3km 1300m」·「66분 20초」·「9시 80분」)을 오답에서 뺌. 노션 3-1 `5. 길이와 시간` 12행 등록. 시험 `math-length-time3.test.mjs` 8개(옛 `math-pages-split`에서 이 화면 뺌), 폰 크기에서 1~4관 완료·완주 창·퀴즈 배틀 확인. **묶음 F 끝** |
 | 2026-11-27 | A | `--add-missing`·빠진 자리 시험 추가, HTML 125개의 `?v=` 521곳 채움(하이드로젠 medium 초안, Claude 적용·검수). 버전 글자를 그대로 비교하던 시험 7개를 쿼리 무시로 고침 |
 | 2026-11-27 | B | `kids/data/legacy_backup/`(5개)·`kids/deprecated_backup/`(2개) 지움, 검사 제외 목록·주석 정리. 되살리기: `git checkout 2b7de65b -- kids/data/legacy_backup kids/deprecated_backup` |
 | 2026-11-28 | E | 같은 이름 함수 15개 비교 → 본문이 갈라져 합치지 않음. 사회방 음성이 기계음이던 버그(공용 함수 덮어쓰기) 고침, 「Fairy_」 오타, 덮어쓰기 금지 시험 |

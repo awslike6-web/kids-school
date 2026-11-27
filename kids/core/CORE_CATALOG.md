@@ -408,10 +408,10 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 ### 수학 페이지 인라인 CSS·JS 분리 (2026-10-31)
 
-- 대상 HTML: `kids/subjects/math/`의 `fractions_multiplication.html`, `fractions_training.html`, `math_operator_studio.html`, `ranges_estimation.html`, `length_time.html`. 마크업·기존 외부 스크립트 순서·전역 함수는 그대로 유지합니다.
-- 스타일: `kids/css/math_fractions_multiplication.css`, `math_fractions_training.css`, `math_operator_studio.css`, `math_ranges_estimation.css`, `math_length_time.css`. 각 HTML의 원래 style 위치에서 상대 경로로 로드합니다.
-- 스크립트: `kids/subjects/math/js/`의 `fractions_multiplication-core.js` → `fractions_multiplication-main.js`, `fractions_training-core.js` → `fractions_training-main.js`, `math_operator_studio-plans.js` → `-core.js` → `-blocks.js` → `-numberline.js` → `-main.js`(아래 연산 스튜디오 절), `ranges_estimation-core.js` → `ranges_estimation-main.js`. `length_time.js`는 단일 파일입니다.
-- 전역 API: 분수 탐험 `switchTab`·`initPlayground`, 분수 훈련 `renderFrac`·`renderMixed`·`switchTrainMode`, 연산 스튜디오 `startStudioCalculation`·`switchViewTab`, 수의 범위 `selectRangePreset`·`setRoundingScope`, 길이·시간 `selectRulerItem`·`startStopwatchChallenge`. 호출부·동작은 변경하지 않습니다.
+- 대상 HTML: `kids/subjects/math/`의 `fractions_multiplication.html`, `fractions_training.html`, `math_operator_studio.html`, `ranges_estimation.html`(`length_time.html`은 2026-11-28 묶음 F7에서 공용 탐험관 틀로 옮겨 이 절에서 빠짐 — 「3-1 길이와 시간 탐험관」 절). 마크업·기존 외부 스크립트 순서·전역 함수는 그대로 유지합니다.
+- 스타일: `kids/css/math_fractions_multiplication.css`, `math_fractions_training.css`, `math_operator_studio.css`, `math_ranges_estimation.css`. 각 HTML의 원래 style 위치에서 상대 경로로 로드합니다.
+- 스크립트: `kids/subjects/math/js/`의 `fractions_multiplication-core.js` → `fractions_multiplication-main.js`, `fractions_training-core.js` → `fractions_training-main.js`, `math_operator_studio-plans.js` → `-core.js` → `-blocks.js` → `-numberline.js` → `-main.js`(아래 연산 스튜디오 절), `ranges_estimation-core.js` → `ranges_estimation-main.js`.
+- 전역 API: 분수 탐험 `switchTab`·`initPlayground`, 분수 훈련 `renderFrac`·`renderMixed`·`switchTrainMode`, 연산 스튜디오 `startStudioCalculation`·`switchViewTab`, 수의 범위 `selectRangePreset`·`setRoundingScope`. 호출부·동작은 변경하지 않습니다.
 - 모든 신규 참조의 캐시 버전은 `20261031-split`. 클래식 스크립트로 원래 위치에서 core → main을 연달아 로드하며, 초기화는 마지막 파일의 기존 `DOMContentLoaded`에 남습니다. IIFE·module·defer를 추가하지 않습니다.
 - 검증: `tests/math-pages-split.test.mjs`가 고정 main fixture와 원문·마크업 보존, 상대 경로 실존, 파일 크기, 인라인 블록 제거, 뒤 파일 로드 전 실행 안전성을 검사합니다. 상세 경계·줄 수는 `docs/math_pages_split_spec.md`를 따릅니다.
 
@@ -534,6 +534,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/subjects/math/js/angles_concept-core.js` (`window.AngleCore`, 순수 모듈): 각은 수학 좌표(0°=오른쪽, 시계 반대 방향). `polar`(SVG 점, y 뒤집음)·`wedgePath`(부채꼴)·`kind`(예각·직각·둔각, 0°·180°는 null)·`makeRead`(각도기 읽기 20°~160°, 오답 = 반대 눈금 180−각·한 칸 ±10)·`makeBuild`(각 만들기 목표, 직전과 다른 종류)·`triPoints`/`quadPoints`(적힌 각대로 실제 꼭짓점 계산, 사각형은 두 변 길이를 풀어 닫음)·`cornerStart`/`measure`·`fit`(상자 맞춤)·`makeTriangle`(가장 작은 각 30° 이상)/`makeQuad`(60°~130°, 합 360°).
 - `kids/subjects/math/js/angles_concept-labs.js` (`window.AngleLabs`): 1관 각도기 읽기(안쪽·바깥쪽 눈금, 틀린 눈금 힌트)·2관 각 만들기(슬라이더·±5°, 다 만든 뒤 예각·직각·둔각 고르기)·3관 삼각형 세 각(세 모퉁이 모으기 → 일직선)·4관 사각형 네 각(네 모퉁이 모으기 → 한 바퀴, 대각선 긋기) + 퀴즈 배틀(`4-1`·`2. 각도`). `kids/css/math_angles_concept.css`(`mx-theme-angles4`, 같은 파일 이름에 새 내용).
 - 퀴즈 자료 `scripts/data/curriculum/math_4-1_2.json`(12제). 시험 `tests/math-angles-concept4.test.mjs`(옛 분리 시험 `math-pages-split2`에서는 각도 화면을 뺌). 「평각」은 중학교 말이라 쓰지 않음.
+
+### 📏 3-1 길이와 시간 탐험관 (2026-11-28, 옛 화면을 공용 틀로)
+
+옛 `length_time.html`(238줄) + `js/length_time.js`(532줄, 박힌 번개 퀴즈)을 공용 틀로 옮김(묶음 F7). 옛 `js/length_time.js`는 지움. 옛 「태양계 행성 거리」 부분은 축척이 서로 맞지 않아(달은 10만분의 1인데 1AU를 1km 500m로 적음) 빼고 단위 바꾸기 관으로 바꿈. 계단: ⬇ 2-2 길이 재기 · ⬇ 2-2 시각과 시간.
+- `kids/subjects/math/js/length_time-core.js` (`window.LenTimeCore`, 순수 모듈, 정수만): `fmtMm`·`fmtM`·`fmtSec`(cm mm / km m / 분 초 글)·`threeChoices`·`makeMeasure`(6cm 자, 시작 0·1cm·1.5cm·2cm, 오답 = 끝 눈금 그대로·1cm·1mm 차이)·`makeConvert`(cm↔mm·km↔m, 자리 실수 오답 305mm·230m·20030m 등)·`makeSense`/`judgeSense`(목표 5~15초, 0.1초 반올림 ±1초)·`makeTime`(분↔초·받아올림 덧셈·받아내림 뺄셈, 오답 = 「1분=100초」·받아올림 빠뜨림·거꾸로 빼기, 정답과 같은 값의 다른 꼴은 오답에 넣지 않음).
+- `kids/subjects/math/js/length_time-labs.js` (`window.LenTimeLabs`): 1관 자로 재기(🔍 시작·끝 부분 크게 보기)·2관 단위 바꾸기(단위 표)·3관 1초 감각(안 보고 멈추기, 「보면서 하기」 연습은 미션에 안 셈)·4관 시간 계산 + 퀴즈 배틀(`3-1`·`5. 길이와 시간`). `kids/css/math_length_time.css`(`mx-theme-lentime3`, 같은 파일 이름에 새 내용).
+- 퀴즈 자료 `scripts/data/curriculum/math_3-1_5.json`(12제). 시험 `tests/math-length-time3.test.mjs`(옛 분리 시험 `math-pages-split`에서는 이 화면을 뺌).
 
 ### 📊 4학년 막대그래프·꺾은선그래프 탐험관 (2026-11-25)
 
