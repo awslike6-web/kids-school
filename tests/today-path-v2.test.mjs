@@ -221,7 +221,7 @@ test('설정 저장: 기기에 학습설정 캐시가 없으면 노션 것을 �
 
 // ---------- 틀린 문항 먼저 ----------
 function lessonFixture(n = 20) {
-  const { sandbox } = loadBrowserScripts(['kids/subjects/quest/quest-mastery.js', 'kids/subjects/quest/quest-lesson.js']);
+  const { sandbox } = loadBrowserScripts(['kids/subjects/quest/quest-questions.js', 'kids/subjects/quest/quest-mastery.js', 'kids/subjects/quest/quest-lesson.js']);
   const items = Array.from({ length: n }, (_, i) => ({ id: 'item' + i, word: 'word' + i, meaning: '뜻' + i, detail: '설명' + i, kind: i % 4 === 0 ? 'sentence' : 'word' }));
   return { L: sandbox.QuestLesson, items, store: { items: {}, dirty: {}, pushedAt: {} } };
 }

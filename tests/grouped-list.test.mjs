@@ -40,7 +40,7 @@ const VOCA = [
 ];
 
 function vocaGroups(order = new Map()) {
-  const sb = load(['kids/subjects/quest/quest-mastery.js', 'kids/js/korean_voca.js']);
+  const sb = load(['kids/subjects/quest/quest-questions.js', 'kids/subjects/quest/quest-mastery.js', 'kids/js/korean_voca.js']);
   return { sb, groups: sb.KoreanVoca.buildUnitGroups(VOCA, { textbookOrder: order }) };
 }
 

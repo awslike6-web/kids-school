@@ -9,6 +9,7 @@ import { read } from './split-rules.mjs';
 const FILE = 'kids/js/korean_batchim_bingo.js';
 const sandbox = { window: {} };
 vm.createContext(sandbox);
+vm.runInContext(read('kids/subjects/quest/quest-questions.js'), sandbox, { filename: 'quest-questions.js' }); // 문제 만들기 먼저 (묶음 D2)
 vm.runInContext(read('kids/subjects/quest/quest-mastery.js'), sandbox, { filename: 'quest-mastery.js' });
 vm.runInContext(read(FILE), sandbox, { filename: FILE });
 const B = sandbox.window.BatchimBingo;
@@ -177,7 +178,7 @@ test('단원 묶기: 단원 원문 숫자 순서, 쓸 수 있는 낱말 수', ()
 
 test('화면 파일 계약: 싣는 순서·공용 CSS 먼저·국어방 카드는 민서만·innerHTML 없음', () => {
   const html = read('kids/subjects/korean/batchim_bingo.html');
-  const order = ['fairy-tts.js', 'fairy-engine.js', 'quest-mastery.js', 'math_explorer-shell.js', 'math_squishy.js', 'math_explorer-ladder.js', 'math_bingo.js', 'korean_batchim_bingo.js'];
+  const order = ['fairy-tts.js', 'fairy-engine.js', 'quest-questions.js', 'quest-mastery.js', 'math_explorer-shell.js', 'math_squishy.js', 'math_explorer-ladder.js', 'math_bingo.js', 'korean_batchim_bingo.js'];
   let at = -1;
   for (const f of order) {
     const i = html.indexOf(f);

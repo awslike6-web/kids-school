@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { loadBrowserScripts } from './browser-sandbox.mjs';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
-const files = ['kids/subjects/quest/quest-mastery.js', 'kids/subjects/quest/quest-lesson.js'];
+const files = ['kids/subjects/quest/quest-questions.js', 'kids/subjects/quest/quest-mastery.js', 'kids/subjects/quest/quest-lesson.js'];
 const plain = value => JSON.parse(JSON.stringify(value));
 function fixture(n = 20) {
   const { sandbox } = loadBrowserScripts(files);

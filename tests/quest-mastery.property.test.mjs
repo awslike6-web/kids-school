@@ -26,7 +26,7 @@ const zero = () => ({ c: 0, s: '', r: '' });
 const textOf = state => `${state.c}|${state.s}|${state.r}`;
 
 function fixture(rng) {
-  const { sandbox } = loadBrowserScripts([SOURCE]);
+  const { sandbox } = loadBrowserScripts(['kids/subjects/quest/quest-questions.js', SOURCE]);
   equal('준비', sandbox.Date === Date, true, '샌드박스와 호스트의 Date 객체 공유');
   const api = sandbox.QuestMastery, child = choose(rng, ['minsu', 'minseo']);
   const childName = child === 'minsu' ? '민수' : '민서';
