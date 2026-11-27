@@ -330,6 +330,8 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "number_three-core.js", "path": "kids-school-main/kids/subjects/math/js/number_three-core.js", "domain": ["math"], "docs": ["math_2-1_ladder_spec.md", "CORE_CATALOG.md"]},
       {"name": "number_three-labs.js", "path": "kids-school-main/kids/subjects/math/js/number_three-labs.js", "domain": ["math"], "docs": ["math_1_bridge_spec.md", "math_2-1_ladder_spec.md", "CORE_CATALOG.md"]},
       {"name": "number_three-twenty.js", "path": "kids-school-main/kids/subjects/math/js/number_three-twenty.js", "domain": ["math"], "docs": ["math_1_bridge_spec.md", "math_2-1_ladder_spec.md", "CORE_CATALOG.md"]},
+      {"name": "planar_shapes-core.js", "path": "kids-school-main/kids/subjects/math/js/planar_shapes-core.js", "domain": ["math"], "docs": ["CORE_CATALOG.md", "refactor_batches.md"]},
+      {"name": "planar_shapes-labs.js", "path": "kids-school-main/kids/subjects/math/js/planar_shapes-labs.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
       {"name": "polygon_area-core.js", "path": "kids-school-main/kids/subjects/math/js/polygon_area-core.js", "domain": ["math"], "docs": ["math_5-1_polyarea_spec.md", "CORE_CATALOG.md"]},
       {"name": "polygon_area-draw.js", "path": "kids-school-main/kids/subjects/math/js/polygon_area-draw.js", "domain": ["math"], "docs": ["math_4-2_shapes_spec.md", "math_5-1_polyarea_spec.md", "CORE_CATALOG.md"]},
       {"name": "polygon_area-labs.js", "path": "kids-school-main/kids/subjects/math/js/polygon_area-labs.js", "domain": ["math"], "docs": ["math_5-1_polyarea_spec.md", "CORE_CATALOG.md"]},

@@ -511,6 +511,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/subjects/math/js/division_concept-core.js` (`window.DivConceptCore`, 순수 모듈): `threeChoices(정답, 후보)`(정답 먼저·중복·1 미만 빼고 3개)·`makeShare`(접시 2~6 × 몫 2~6, 오답 몫±1·접시 수)·`makeFact`(단 × □ = 수, 오답 몫±1·나누는 수)·`remText`·`makeRemainder`(나머지 0 포함, 오답 1은 몫을 덜 세어 나머지 ≥ 나누는 수인 약속 위반, 오답 2는 계산이 틀림, `check` 검산식).
 - `kids/subjects/math/js/division_concept-labs.js` (`window.DivConceptLabs`): 1관 똑같이 나누기(「한 접시에 하나씩 나눠 주기」를 눌러 다 나눈 뒤 몫 고르기)·2관 곱셈구구 짝꿍·3관 몫과 나머지(3-2 맛보기, 맞히면 친구별 사탕·남은 사탕 그림) + 퀴즈 배틀(`3-1`·`3. 나눗셈`). `kids/css/math_division_concept.css`(`mx-theme-divide3`).
 - 퀴즈 자료 `scripts/data/curriculum/math_3-1_3.json`(12제). 시험 `tests/math-division-concept3.test.mjs`.
+
+### 📐 3-1 평면도형 탐험관 (2026-11-28, 옛 화면을 공용 틀로)
+
+옛 `planar_shapes.html`(420줄, 인라인 177줄·박힌 번개 퀴즈)을 공용 틀로 옮김(묶음 F4). 계단: ⬆ 4-1 각도 · ⬆ 4-2 삼각형·사각형.
+- `kids/subjects/math/js/planar_shapes-core.js` (`window.PlanarCore`, 순수 모듈): `letters(n)`(이어진 자음)·`makeLine`(선분·반직선 두 방향·직선, 반직선은 시작점 먼저, 선분·직선은 순서만 바꾼 이름을 오답에 안 넣음)·`makeAngle`(`right` 직각과 비교 — 기호 순서 고정 / `vertex` 꼭짓점 = 가운데 글자, 꼭짓점 문제 연속 없음)·`makeShape`(모눈 칸 2~6, 정사각형 w=h·직사각형 w≠h·직각삼각형 직각 꼭짓점 4방향)·`triPoints`(직각 꼭짓점이 첫째).
+- `kids/subjects/math/js/planar_shapes-labs.js` (`window.PlanarLabs`): 1관 선분·반직선·직선(버튼 4개 그림 + 이름 맞히기)·2관 각과 직각(맞히면 직각 표시)·3관 도형 3총사(카드 + 모눈 도형 이름, 맞히면 직각 표시) + 퀴즈 배틀(`3-1`·`2. 평면도형`). 화살촉은 SVG 다각형(marker id 겹침 없음). `kids/css/math_planar_shapes.css`(`mx-theme-planar3`).
+- 퀴즈 자료 `scripts/data/curriculum/math_3-1_2.json`(12제). 시험 `tests/math-planar-shapes3.test.mjs`.
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
