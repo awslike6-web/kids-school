@@ -14,8 +14,10 @@
  *   경로가 적혀 있는데 그 파일이 없으면 「못 찾음」(이름만 보고 다른 파일로 넘어가지 않음). http·// 주소는 건드리지 않는다.
  *
  * 사용:
- *   node scripts/stamp_versions.mjs           # 낡은 버전 표시를 고쳐 쓴다
- *   node scripts/stamp_versions.mjs --check   # 고치지 않고 알림(낡은 곳·못 찾은 곳이 있으면 종료 코드 1)
+ *   node scripts/stamp_versions.mjs               # 낡은 버전 표시를 고쳐 쓴다
+ *   node scripts/stamp_versions.mjs --check       # 고치지 않고 알림(낡은 곳·못 찾은 곳·빠진 곳이 있으면 종료 코드 1)
+ *   node scripts/stamp_versions.mjs --add-missing # ?v=가 빠진 <script>/<link>에 채우고 해시까지 맞춘다
+ *     # 데이터 파일(kids/data·scripts/data)은 등록 도구가 바꾸므로 채우지 않는다
  *   node scripts/stamp_versions.mjs --only kids/data/gallery-data.js,kids/data/special-days-data.js
  *     # 적은 파일(저장소 기준 경로)을 가리키는 자리만 고치고, 고친 파일을 `   고침: 경로`로 한 줄씩 알림.
  *     # 등록 도구가 데이터 파일을 바꾼 뒤 부른다(scripts/version_stamp.py). 다른 낡은 자리는 건드리지 않는다.
@@ -35,10 +37,12 @@ const SKIP_DIRS = new Set(['node_modules', 'deprecated_backup', '.git', 'archive
 const REF_RE = /([A-Za-z0-9_.\/-]*?)([A-Za-z0-9_.-]+\.(?:js|css))\?v=([A-Za-z0-9_.-]+)/g;
 // 로더 배열 `'파일명.js', '?v=값'`
 const SPLIT_RE = /(['"])([A-Za-z0-9_.-]+\.(?:js|css))\1(\s*,\s*)(['"])\?v=([A-Za-z0-9_.-]+)\4/g;
+// HTML `<script ...>`·`<link ...>` 태그
+const TAG_RE = /<(script|link)\b([^>]*)>/gi;
 
 /** BOM·줄바꿈 차이만 빼고 내용 해시 8자리 (안에 적힌 ?v= 값은 포함 — 하위 모듈이 바뀌면 로더도 바뀌게) */
 export function contentStamp(text) {
-  const body = String(text).replace(/^﻿/, '').replace(/\r\n/g, '\n');
+  const body = String(text).replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
   return crypto.createHash('sha1').update(body, 'utf8').digest('hex').slice(0, STAMP_LENGTH);
 }
 
@@ -56,6 +60,13 @@ function walkFiles(dir, test, out = []) {
 export function listSourceFiles(root = ROOT) {
   const top = fs.readdirSync(root).filter(f => /\.(?:html|js)$/.test(f)).map(f => path.join(root, f));
   return [...top, ...walkFiles(path.join(root, 'kids'), n => /\.(?:html|js)$/.test(n))];
+}
+
+function listHtmlFiles(root = ROOT) {
+  const top = fs.readdirSync(root).filter(f => /\.html$/i.test(f)).map(f => path.join(root, f));
+  const kidsDir = path.join(root, 'kids');
+  const kids = fs.existsSync(kidsDir) ? walkFiles(kidsDir, n => /\.html$/i.test(n)) : [];
+  return [...top, ...kids];
 }
 
 /** 대소문자까지 정확히 있는 파일인가 (Windows는 대소문자를 무시하지만 GitHub Pages·원격 시험은 구분) */
@@ -80,6 +91,9 @@ function indexByName(root) {
 
 const inside = (root, file) => file === root || file.startsWith(root + path.sep);
 
+const isDataTarget = (root, target) =>
+  inside(path.join(root, 'kids', 'data'), target) || inside(path.join(root, 'scripts', 'data'), target);
+
 /** 가리키는 파일 찾기 (못 찾으면 null) */
 export function resolveTarget(fromFile, prefix, name, byName, root = ROOT) {
   if (prefix) {
@@ -91,6 +105,51 @@ export function resolveTarget(fromFile, prefix, name, byName, root = ROOT) {
   if (existsExact(same)) return same;
   const candidates = byName.get(name) || [];
   return candidates.length === 1 ? candidates[0] : null;
+}
+
+/** 한 HTML 파일에서 ?v=가 빠진 <script src>·<link href> 자리를 찾고, 필요 시 ?v=0을 채운다 */
+function processHtmlMissing(file, text, byName, root, missing, unresolved, fill) {
+  const rel = path.relative(root, file).replace(/\\/g, '/');
+  return text.replace(TAG_RE, (tagWhole, tagName, attrs) => {
+    const attrName = tagName.toLowerCase() === 'script' ? 'src' : 'href';
+    const attrRe = new RegExp(`(^|\\s)(${attrName}\\s*=\\s*)(["'])([^"']*)\\3`, 'i');
+    const nextAttrs = attrs.replace(attrRe, (attrWhole, ws, eq, quote, val) => {
+      if (!/\.(?:js|css)$/i.test(val) || val.includes('?') || val.includes('#')) return attrWhole;
+      if (val.startsWith('//') || val.includes(':')) return attrWhole;
+      const slash = val.lastIndexOf('/');
+      const prefix = slash >= 0 ? val.slice(0, slash + 1) : '';
+      const name = slash >= 0 ? val.slice(slash + 1) : val;
+      const target = resolveTarget(file, prefix, name, byName, root);
+      if (!target) { unresolved.push({ file: rel, ref: val }); return attrWhole; }
+      if (isDataTarget(root, target)) return attrWhole;
+      missing.push({ file: rel, ref: val });
+      return fill ? `${ws}${eq}${quote}${val}?v=0${quote}` : attrWhole;
+    });
+    return fill && nextAttrs !== attrs ? `<${tagName}${nextAttrs}>` : tagWhole;
+  });
+}
+
+/** HTML 파일에서 ?v=가 빠진 <script src>·<link href> 자리 찾기 */
+export function findMissing(root = ROOT) {
+  const byName = indexByName(root);
+  const missing = [], unresolved = [];
+  for (const file of listHtmlFiles(root)) {
+    processHtmlMissing(file, fs.readFileSync(file, 'utf8'), byName, root, missing, unresolved, false);
+  }
+  return { missing, unresolved };
+}
+
+/** 빠진 자리에 ?v=0을 채워 파일에 쓴다 (해당 값 외 글자·CRLF·BOM 그대로) */
+export function addMissing(root = ROOT) {
+  const byName = indexByName(root);
+  const missing = [], unresolved = [];
+  let files = 0;
+  for (const file of listHtmlFiles(root)) {
+    const text = fs.readFileSync(file, 'utf8');
+    const next = processHtmlMissing(file, text, byName, root, missing, unresolved, true);
+    if (next !== text) { fs.writeFileSync(file, next, 'utf8'); files++; }
+  }
+  return { added: missing.length, files, unresolved };
 }
 
 /** 이 자리가 http·// 주소의 일부인가 — 앞쪽으로 따옴표·공백·괄호·=까지 거슬러 올라가 본다 */
@@ -126,13 +185,13 @@ function restamp(file, text, stampOf, byName, root, found, only = null) {
   return next;
 }
 
+/** 파일 비교용 열쇠 (Windows 대소문자·구분자 차이 무시) */
+const sameFile = file => path.resolve(file).toLowerCase();
+
 /**
  * 고정점까지 반복해 맞춘 결과 → { stale: [{file, ref, want}], unresolved: [{file, ref}], files: Map(file → 고친 글), passes, cyclic }
  * stale은 디스크 기준으로 바뀌는 자리(마지막 값 기준), files는 바뀌는 파일의 최종 글.
  */
-/** 파일 비교용 열쇠 (Windows 대소문자·구분자 차이 무시) */
-const sameFile = file => path.resolve(file).toLowerCase();
-
 export function scan(root = ROOT, { only = null } = {}) {
   if (only) only = new Set([...only].map(f => sameFile(path.resolve(root, f))));
   const byName = indexByName(root);
@@ -200,6 +259,14 @@ function main(argv) {
   const check = argv.includes('--check');
   const onlyRels = onlyArg(argv);
   if (onlyRels) return mainOnly(onlyRels, check);
+  if (!check && argv.includes('--add-missing')) {
+    const { added, files: addedFiles, unresolved: missingUnresolved } = addMissing();
+    console.log(`🧩 빠진 ?v= ${added}곳을 채웠습니다 (파일 ${addedFiles}개).`);
+    if (missingUnresolved.length) {
+      console.log(`ℹ️ 가리키는 파일을 못 찾아 그대로 둔 자리 ${missingUnresolved.length}곳:`);
+      for (const u of missingUnresolved.slice(0, 20)) console.log(`   ${u.file}: ${u.ref}`);
+    }
+  }
   const { stale, unresolved, files, cyclic } = scan();
   if (cyclic) { console.log(`❌ 서로를 가리키는 파일이 있어 버전이 정해지지 않습니다(${MAX_PASSES}번 반복).`); return 1; }
   if (unresolved.length) {
@@ -207,10 +274,15 @@ function main(argv) {
     for (const u of unresolved.slice(0, 20)) console.log(`   ${u.file}: ${u.ref}`);
   }
   if (check) {
-    if (!stale.length && !unresolved.length) { console.log('✅ 버전 표시가 모두 파일 내용과 맞습니다.'); return 0; }
+    const { missing } = findMissing();
+    if (!stale.length && !unresolved.length && !missing.length) { console.log('✅ 버전 표시가 모두 파일 내용과 맞습니다.'); return 0; }
     if (stale.length) {
       console.log(`❌ 낡은 버전 표시 ${stale.length}곳(파일 ${files.size}개) — node scripts/stamp_versions.mjs 로 고치세요.`);
       for (const s of stale.slice(0, 40)) console.log(`   ${s.file}: ${s.ref} → ?v=${s.want}`);
+    }
+    if (missing.length) {
+      console.log(`❌ ?v= 가 빠진 자리 ${missing.length}곳 — node scripts/stamp_versions.mjs --add-missing 로 채우세요.`);
+      for (const m of missing.slice(0, 20)) console.log(`   ${m.file}: ${m.ref}`);
     }
     return 1;
   }

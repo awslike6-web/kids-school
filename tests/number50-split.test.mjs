@@ -63,7 +63,7 @@ for (const group of groups) {
             assert.ok(first.start > html.indexOf('<head>'));
             assert.ok(second.end < html.indexOf('</head>'));
         } else {
-            assert.ok(first.start > html.indexOf('<script src="../../core/fairy-chatbot.js"></script>'));
+            assert.ok(first.start > html.indexOf('<script src="../../core/fairy-chatbot.js'));
             assert.ok(second.end < html.indexOf('</body>'));
         }
     });

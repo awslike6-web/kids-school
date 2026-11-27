@@ -198,7 +198,7 @@ test('잘못된 주사위·칸·난수 거부, 기본 crypto 난수 경로', () 
 
 test('화면 리소스·상대 경로·로드 순서·줄 수·CSP 없음 계약', () => {
   const base = new URL('kids/playground/family/', root), html = readFileSync(new URL('yacht.html', base), 'utf8');
-  const scripts = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m => m[1]);
+  const scripts = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m => m[1].replace(/\?v=[^"]*$/, '')); // 버전 표시 무시
   assert.deepEqual(scripts, ['../../core/fairy-config.js', '../../core/fairy-tts.js',
     '../../core/fairy-settings-catalog.js', '../../core/fairy-engine.js', '../../data/gallery-data.js',
     '../../subjects/quest/monster_roster.js', 'yacht-engine.js', 'family-players.js', 'family-sound.js', 'family-room.js', 'family-room-ui.js', 'yacht-ui.js']);

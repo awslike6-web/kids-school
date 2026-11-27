@@ -239,6 +239,6 @@ test('파일 한도·이름 삽입 방식·기존 설정 요소와 상대 로드
   const html = read('omok.html');
   for (const id of ['setupTitle', 'playerSetup', 'boardSize', 'setupError', 'startGame'])
     assert.ok(html.indexOf(`id="${id}"`) < html.indexOf('id="resumeView"'));
-  assert.ok(html.indexOf('src="family-room.js"') < html.indexOf('src="family-room-ui.js"'));
-  assert.ok(html.indexOf('src="family-room-ui.js"') < html.indexOf('src="omok-ui.js"'));
+  assert.ok(html.indexOf('src="family-room.js') < html.indexOf('src="family-room-ui.js'));
+  assert.ok(html.indexOf('src="family-room-ui.js') < html.indexOf('src="omok-ui.js'));
 });

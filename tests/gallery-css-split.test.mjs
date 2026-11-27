@@ -51,7 +51,7 @@ test('갤러리 CSS: design-system.css 다음의 기존 head 위치에 연속으
     assert.equal(block.replace(/<link\b[^>]*>/gi, '').trim(), '', '분리 링크 사이에 다른 마크업이 있음');
     assert.match(block, /^[^\r\n]+\r?\n[\t ]*<link\b[^\r\n]+>$/, '두 링크는 바로 다음 줄에 있어야 함');
     const previous = links[links.indexOf(first) - 1];
-    assert.equal(previous.href, '../css/design-system.css');
+    assert.equal(previous.href.replace(/\?v=[^"']*$/, ''), '../css/design-system.css'); // 버전 표시(?v=)는 도구가 붙임
     assert.equal(html.slice(previous.index + previous.tag.length, start).trim(), '');
     assert.equal(html.slice(end, html.indexOf('</head>')).trim(), '');
 });

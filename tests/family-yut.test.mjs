@@ -403,12 +403,12 @@ test('리소스 계약: 줄 수, 상대 경로, 금지 API 없음, 로비 및 �
   assert.doesNotMatch(uiSource, /Math\.random/);
 
   const html = read('yut.html');
-  assert.ok(html.indexOf('src="../../core/fairy-config.js"') < html.indexOf('src="yut-ui.js"'));
-  assert.ok(html.includes('href="family-room.css"'));
+  assert.ok(html.indexOf('src="../../core/fairy-config.js') < html.indexOf('src="yut-ui.js'));
+  assert.ok(html.includes('href="family-room.css'));
   const scripts = ['family-players.js', 'family-sound.js', 'yut-engine.js', 'family-room.js', 'family-room-ui.js', 'yut-ui.js'];
   scripts.forEach((file, i) => {
-    assert.ok(html.includes(`src="${file}"`));
-    if (i) assert.ok(html.indexOf(`src="${scripts[i - 1]}"`) < html.indexOf(`src="${file}"`));
+    assert.ok(html.includes(`src="${file}`)); // 버전 표시(?v=)는 무시
+    if (i) assert.ok(html.indexOf(`src="${scripts[i - 1]}`) < html.indexOf(`src="${file}`));
   });
   assert.doesNotMatch(html, /<meta[^>]*Content-Security-Policy/i);
 

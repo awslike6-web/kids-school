@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { contentStamp, scan, resolveTarget, STAMP_LENGTH } from '../scripts/stamp_versions.mjs';
+import { contentStamp, scan, resolveTarget, STAMP_LENGTH, findMissing, addMissing } from '../scripts/stamp_versions.mjs';
 
 test('저장소의 모든 ?v= 버전 표시가 파일 내용 해시와 맞고, 가리키는 파일을 모두 찾는다', () => {
   const { stale, unresolved } = scan();
@@ -123,5 +123,95 @@ test('도구 --only 명령: 고친 파일을 「고침:」으로 알리고, --ch
   assert.equal(fix.status, 0);
   assert.equal(run('--only', 'kids/data/d.js', '--check').status, 0);
   assert.equal(run('--only', 'kids/data/none.js').status, 2);  // 없는 파일
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+
+test('저장소에 ?v= 가 빠진 HTML 태그가 없다', () => {
+  const { missing } = findMissing();
+  const preview = missing.slice(0, 10).map(m => `${m.file}: ${m.ref}`);
+  assert.deepEqual(
+    preview,
+    [],
+    `?v= 빠진 HTML 태그 ${missing.length}곳 (${preview.join(', ')}) — node scripts/stamp_versions.mjs --add-missing 으로 채우세요`
+  );
+});
+
+test('도구 findMissing·addMissing: 빠진 ?v=만 채우고 외부·데이터·없는 파일·CRLF 줄바꿈은 건드리지 않는다', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'stamp-missing-'));
+  const w = (rel, text) => {
+    fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
+    fs.writeFileSync(path.join(root, rel), text);
+  };
+  w('kids/core/a.js', 'const A = 1;\n');
+  w('kids/subjects/css/b.css', 'body{}\n');
+  w('kids/data/d.js', 'const D = 1;\n');
+  const pHtml = [
+    '<script src="../core/a.js"></script>',
+    '<link rel="stylesheet" href="css/b.css">',
+    "<link href='css/b.css' rel=\"stylesheet\">",
+    '<script src="https://cdn.example.com/x.js"></script>',
+    '<link rel="stylesheet" href="//cdn.example.com/y.css">',
+    '<script src="../core/none.js"></script>',
+    '',
+  ].join('\r\n');
+  const crlfCount = (pHtml.match(/\r\n/g) || []).length;
+  w('kids/subjects/p.html', pHtml);
+  w('page.html', '<script src="kids/data/d.js"></script>\n<script src="kids/core/a.js?v=abc"></script>\n');
+
+  const before = findMissing(root);
+  assert.equal(before.missing.length, 3);
+  assert.deepEqual(
+    before.unresolved.map(u => `${u.file}: ${u.ref}`),
+    ['kids/subjects/p.html: ../core/none.js']
+  );
+
+  const res = addMissing(root);
+  assert.equal(res.added, 3);
+  assert.equal(res.unresolved.length, 1);
+
+  const pAfter = fs.readFileSync(path.join(root, 'kids/subjects/p.html'), 'utf8');
+  assert.ok(pAfter.includes('<script src="../core/a.js?v=0"></script>'));
+  assert.ok(pAfter.includes('<link rel="stylesheet" href="css/b.css?v=0">'));
+  assert.ok(pAfter.includes("<link href='css/b.css?v=0' rel=\"stylesheet\">"));
+  assert.ok(pAfter.includes('https://cdn.example.com/x.js'));
+  assert.ok(pAfter.includes('//cdn.example.com/y.css'));
+  assert.ok(pAfter.includes('<script src="../core/none.js"></script>'));
+  assert.equal((pAfter.match(/\r\n/g) || []).length, crlfCount);
+
+  const pageAfter = fs.readFileSync(path.join(root, 'page.html'), 'utf8');
+  assert.ok(pageAfter.includes('<script src="kids/data/d.js"></script>'));
+  assert.ok(pageAfter.includes('<script src="kids/core/a.js?v=abc"></script>'));
+
+  const r = scan(root);
+  for (const [f, t] of r.files) fs.writeFileSync(f, t);
+  assert.equal(findMissing(root).missing.length, 0);
+  assert.equal(scan(root).stale.length, 0);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('도구 --add-missing 명령: 빠진 태그가 있으면 --check는 1, --add-missing으로 채운 뒤엔 0', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'stamp-missing-cli-'));
+  const w = (rel, text) => {
+    fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
+    fs.writeFileSync(path.join(root, rel), text);
+  };
+  w('scripts/stamp_versions.mjs', fs.readFileSync(new URL('../scripts/stamp_versions.mjs', import.meta.url), 'utf8'));
+  w('kids/core/a.js', 'const A = 1;\n');
+  w('page.html', '<script src="kids/core/a.js"></script>\n');
+
+  const run = (...args) => spawnSync(process.execPath, ['scripts/stamp_versions.mjs', ...args], { cwd: root, encoding: 'utf8' });
+  const checkBefore = run('--check');
+  assert.equal(checkBefore.status, 1);
+  assert.match(checkBefore.stdout, /--add-missing/);
+
+  const fix = run('--add-missing');
+  assert.equal(fix.status, 0);
+
+  const checkAfter = run('--check');
+  assert.equal(checkAfter.status, 0);
+
+  const page = fs.readFileSync(path.join(root, 'page.html'), 'utf8');
+  assert.match(page, new RegExp(`kids/core/a\\.js\\?v=[0-9a-f]{${STAMP_LENGTH}}`));
   fs.rmSync(root, { recursive: true, force: true });
 });

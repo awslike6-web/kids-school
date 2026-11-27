@@ -162,14 +162,14 @@ test('입력은 정확히 2명·고유 ID/말·이름 1~8자·도움·유효 주
 });
 
 test('화면 리소스·공통 CSS·로드 순서·파일 상한·로비와 대문 진입', () => {
-  const html = read('omok.html'), scripts = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m => m[1]);
+  const html = read('omok.html'), scripts = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m => m[1].replace(/\?v=[^"]*$/, '')); // 버전 표시 무시
   assert.deepEqual(scripts, ['../../core/fairy-config.js', '../../core/fairy-tts.js', '../../core/fairy-settings-catalog.js',
     '../../core/fairy-engine.js', '../../data/gallery-data.js', '../../subjects/quest/monster_roster.js',
     'family-players.js', 'family-sound.js', 'omok-engine.js', 'family-room.js', 'family-room-ui.js', 'omok-ui.js']);
   for (const [, target] of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
     assert.doesNotMatch(target, /^(?:\/|[a-z]+:)/i); assert.ok(existsSync(new URL(target, base)), target);
   }
-  assert.match(html, /href="yacht.css"/); assert.doesNotMatch(html, /Content-Security-Policy/);
+  assert.match(html, /href="yacht.css(?:\?v=[0-9a-f]+)?"/); assert.doesNotMatch(html, /Content-Security-Policy/);
   for (const [file, max] of [['omok-engine.js', 300], ['omok-ui.js', 600], ['omok.html', 150], ['omok.css', 400], ['family-players.js', 300]])
     assert.ok(read(file).trimEnd().split('\n').length <= max, file);
   const config = readFileSync(new URL('kids/js/lobby_config.js', root), 'utf8');
