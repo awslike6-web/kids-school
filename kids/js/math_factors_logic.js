@@ -46,6 +46,8 @@ function soundFly() {
 }
 
 function speak(text) {
+  // 공용 요정 음성(Edge 선희)을 먼저, 없을 때만 브라우저 음성 (헌법 §6, 2026-11-28 — 그전엔 늘 기계음)
+  if (typeof speakFairyTTS === 'function') { speakFairyTTS(text); return; }
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);

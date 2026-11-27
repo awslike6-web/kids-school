@@ -135,7 +135,7 @@ function getRewardWealthHtml(theme, count, imageBasePath) {
 // ============================================================================
 var FAIRY_CORE_CHAIN = [
     'fairy-config.js?v=556cfe19',
-    'fairy-tts.js?v=ed19bef4',
+    'fairy-tts.js?v=653e7029',
     'fairy-settings-catalog.js?v=080e1dc2',
     'fairy-engine.js?v=f5ff3e27'
 ];

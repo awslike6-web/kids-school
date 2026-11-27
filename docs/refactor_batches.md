@@ -75,7 +75,7 @@
 - **조사 결과 (2026-11-28)**: 국어·사회·영어·과학 대문(`*_common.js`, 합계 약 2,800줄)에 같은 이름 함수가 15개 있지만, 본문 겹침은 0.06~0.5에 그친다(로딩 표시 0.5, 토론 마무리 0.72 외에는 과목마다 고쳐 쓴 다른 코드). 합치면 화면 동작이 바뀌므로 **억지로 합치지 않는다**. 대신 조사 중 찾은 버그를 고쳤다:
   - 사회방 대문이 공용 `speakFairyTTS`·`stopFairyTTS`를 다시 정의해, 10-02부터 사회방 음성이 Edge(선희) 대신 브라우저 기계음이었다 → 지움, 시험 `tests/society-tts.test.mjs`(공용 음성 함수 덮어쓰기 금지)
   - 국어·영어 로딩 문구에 보이던 「Fairy_」 오타
-- **남은 후보**: 공용 음성 대신 `speechSynthesis`를 직접 부르는 곳 7개(`voca_modal.js`, `english_phonics.js`, `math_factors_logic.js`, `math_number50.js`, `listen.html`, `haru_common.js`, `fractions_multiplication-core.js`) — 대체 경로인지 헌법 §6 위반인지 하나씩 확인할 것.
+- **기계음 직접 호출 7곳 점검 (2026-11-28)**: 5곳(단어 모달 2·50까지의 수·하루방·분수 곱셈)은 공용 음성이 없을 때만 쓰는 대체 경로, 파닉스는 Edge Jenny를 직접 부르고 실패 때만 대체 → 그대로. **늘 기계음이던 2곳을 고침**: 나눗셈·약수(`math_factors_logic.js` `speak`)는 공용 `speakFairyTTS` 먼저, 영어 듣기(`listen.html`, 인쇄 카드 QR)는 공용 Edge 재생(`playCloudflareEdgeTtsStream`에 이번만 빠르기 `options.playbackRate` 추가)으로 — 요정 목소리 끔과 상관없이 읽고, 이전 재생 알림 무시·첫 자동 재생 막힘 처리(카본 검토). 시험 `society-tts.test.mjs`에 「기계음만 쓰는 파일 금지」.
 - 과목 공통 파일(`korean_common.js` 783, `english_common.js` 772, `society_common.js` 794)과 수학 `*-core.js`에서 같은 일을 하는 함수(섞기·날짜·말풍선·보상 호출 등)를 찾아 공용으로 올린다.
 - 먼저 목록만 만들고, 합칠 것은 작은 묶음으로 다시 나눈다.
 

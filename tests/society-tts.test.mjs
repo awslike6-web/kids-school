@@ -54,3 +54,38 @@ test('사회방 대문을 싣고 나도 speakFairyTTS는 공용 함수 그대로
     vm.runInContext(fs.readFileSync(path.join(root, 'kids/js/society_common.js'), 'utf8'), ctx);
     assert.equal(ctx.speakFairyTTS, real);
 });
+
+test('브라우저 음성(speechSynthesis.speak)을 직접 부르는 파일은 공용 음성을 먼저 쓰는 경로도 갖는다 (헌법 §6)', () => {
+    // 2026-11-28 점검: 나눗셈·약수(math_factors_logic.js)·영어 듣기(listen.html)가 공용 음성이 있어도 늘 기계음이었다
+    const offenders = [];
+    const files = [...jsFiles(path.join(root, 'kids')), ...htmlFiles(path.join(root, 'kids')),
+        ...fs.readdirSync(root).filter(f => f.endsWith('.html')).map(f => path.join(root, f))];
+    for (const file of files) {
+        const rel = path.relative(root, file).split(path.sep).join('/');
+        if (rel === 'kids/core/fairy-tts.js') continue; // 공용 음성 자신(브라우저 대체 경로)
+        const src = fs.readFileSync(file, 'utf8');
+        if (!/speechSynthesis\.speak\s*\(/.test(src)) continue;
+        if (!/\b(speakFairyTTS|speakEnglish|playCloudflareEdgeTtsStream|speakEnglishFromCore)\s*\(/.test(src)) offenders.push(rel);
+    }
+    assert.deepEqual(offenders, [], `공용 음성 없이 기계음만 쓰는 파일:\n${offenders.join('\n')}`);
+});
+
+function htmlFiles(dir, out = []) {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        if (['node_modules', 'data'].includes(e.name)) continue;
+        const full = path.join(dir, e.name);
+        if (e.isDirectory()) htmlFiles(full, out);
+        else if (e.name.endsWith('.html')) out.push(full);
+    }
+    return out;
+}
+
+test('공용 Edge 재생은 이번만 빠르기(playbackRate)를 받고, 듣기 화면은 끔 설정과 상관없이 그것으로 읽는다', () => {
+    const src = fs.readFileSync(path.join(root, 'kids/core/fairy-tts.js'), 'utf8');
+    assert.match(src, /async function playCloudflareEdgeTtsStream\(fullText, onEndCallback = null, forceVoice = null, options = \{\}\)/);
+    assert.match(src, /playbackRate: \(options && options\.playbackRate > 0\) \? options\.playbackRate : \(config\.isEnglish \? getEnglishSpeechRate\(\) : 1\)/);
+    const listen = fs.readFileSync(path.join(root, 'kids/subjects/english/listen.html'), 'utf8');
+    assert.match(listen, /playCloudflareEdgeTtsStream\(eng, done, voice, \{ playbackRate: rate \}\)/);
+    assert.match(listen, /if \(finished \|\| seq !== playSeq\) return;/, '이전 재생의 끝남 알림 무시·한 번만');
+    assert.ok(listen.indexOf('core/fairy-tts.js') > 0 && listen.indexOf('core/fairy-tts.js') < listen.indexOf('function speakText('));
+});

@@ -405,7 +405,8 @@ function playTtsSentenceQueue(sentences, fetchAudio, { playbackRate = 1, playbac
 }
 
 /** Worker Edge 음성으로 긴 글을 문장 단위로 이어 읽기 */
-async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null, forceVoice = null) {
+// options.playbackRate: 이번 재생만 빠르기 (예: 듣기 화면의 0.75×·1.1× 버튼). 없으면 아이별 저장 빠르기 (2026-11-28)
+async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null, forceVoice = null, options = {}) {
     const config = getCloudflareEdgeTtsConfig(fullText);
     if (forceVoice) {
         config.voice = forceVoice;
@@ -422,7 +423,7 @@ async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null, force
     console.log(`🎙️ [Edge-TTS] 총 ${sentences.length}개 문장 [${voiceLabel}] 재생 시작`);
 
     await playTtsSentenceQueue(sentences, s => fetchCloudflareEdgeTtsAudio(s, config), {
-        playbackRate: config.isEnglish ? getEnglishSpeechRate() : 1,
+        playbackRate: (options && options.playbackRate > 0) ? options.playbackRate : (config.isEnglish ? getEnglishSpeechRate() : 1),
         label: 'Edge-TTS',
         onEnd: onEndCallback
     });
