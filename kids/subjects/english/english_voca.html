@@ -246,8 +246,8 @@ let wrongWords = [];
 let vocaQuizOrderType = 'shuffle'; // 'shuffle' or 'sequence'
 let quizState = { mode: '', pool: [], current: 0, score: 0, isWrongMode: false };
 
-let currentProfile = window.currentProfile || 'son';
-let currentTheme = window.currentTheme || '마인크래프트';
+// currentProfile·currentTheme은 english_common.js가 최상위에서 선언한다. 여기서 다시 let으로 선언하면
+// SyntaxError로 이 스크립트 전체가 실행되지 않는다(2026-07~11 화면이 단어를 못 불러온 원인). 시험: tests/inline-redeclare.test.mjs
 
 for(let i=0; i<15; i++){
   const el = document.createElement('div'); el.className = 'float-item'; el.textContent = ['A','B','C','✈️','☁️','✨'][Math.floor(Math.random()*6)];
