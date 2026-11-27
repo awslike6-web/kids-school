@@ -490,6 +490,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - **소수 탐험관 화면**: `decimal_add-draw.js`(그리기 도우미 `DecAddDraw`: grid(10×10 모눈)·gridStepper(＋0.1·＋0.01, 목표에서 잠김)·strip(숫자 띠)·numberLine(구간 고르며 두 번 확대)·pointMover(10배·1/10, 반대 방향은 노란 안내만)·column(세로셈 칸판: 0 채우기→소수점 내려 찍기→오른쪽 자리부터 3지선다, 받아올림·받아내림 표시)), `decimal_add-labs-a.js`(1~3관, `DecAddLabs`), `decimal_add-labs-b.js`(4~7관 + `mount`), `kids/css/math_decimal_add.css`(`mx-theme-decadd`). `decimal_multiplication-core.js` → `decimal_add-core.js` → draw → labs 순서로 싣는다. 학습일지 키 `g:dec4-<종류>`.
 - 퀴즈 자료: `scripts/data/curriculum/math_4-2_1.json`·`math_4-2_3.json`(각 12제, 분수는 글자 표기 계약).
 - 화면 시험: `tests/math-ladder-pages.test.mjs`(실림 순서·상대 경로·600줄·대문 카드 2곳·세로 분수 옵션·글자 분수 금지·조사·학습일지 키).
+
+### 🍰 3-1 분수와 소수 첫걸음 탐험관 (2026-11-28, 옛 화면을 공용 틀로)
+
+옛 `fractions_decimals.html`(770줄, 인라인 스크립트 412줄·박힌 번개 퀴즈)을 공용 탐험관 틀로 옮김(`docs/refactor_batches.md` 묶음 F). 4-2 분수·소수 사다리의 「⬇ 3학년」 칸.
+- `kids/subjects/math/js/fractions_decimals-core.js` (`window.FracDec3Core`, 순수 모듈): 소수는 0.1 단위 정수만(부동소수 없음). `decimalText`(7→`0.7`, 10→`1`)·`tenthsToken`(14→`1과 4/10`)·`barChoice`·`fractionType`(unit·proper·improper·mixed)·`pizzaTarget`·`typeQuestion(kind)`/`randomTypeQuestion`(진·가·대분수 이름, 단위분수 고르기)·`decimalTarget`·`wrongTenths`(시작 눈금이 0이 아니면 끝 눈금 오답 먼저)·`makeBar`.
+- `kids/subjects/math/js/fractions_decimals-labs.js` (`window.FracDec3Labs`): 1관 피자 분수·2관 분수의 이름·3관 0.1 수직선·4관 소수 막대 재기 + 퀴즈 배틀(`3-1`·`6. 분수와 소수`). 관마다 미션 3개를 맞히면 완료, 그 뒤에도 미션이 계속 나옴. `kids/css/math_fractions_decimals.css`(`mx-theme-fracdec3`).
+- 퀴즈 자료 `scripts/data/curriculum/math_3-1_6.json`(12제, Q01~Q06은 옛 번개 퀴즈를 3지선다로). 시험 `tests/math-fractions-decimals3.test.mjs`.
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 

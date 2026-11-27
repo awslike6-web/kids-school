@@ -82,6 +82,20 @@
 ### F. 옛 수학 화면 공용 틀로 옮기기 — L1-화면, 큰 일 (뒤로)
 - 탐험관 모양인 옛 화면(`fractions_decimals` 770, `big_numbers`, `shapes`, `planar_shapes` 등)만 대상으로 한다. 동화 래퍼·대문·연산 도구는 제외한다.
 - 화면이 바뀌므로 폰 크기 사진이 필요하다. 아이가 그 화면을 쓰는 중이면 방학 뒤로 미룬다.
+- **대상과 순서 (2026-11-28 사용자 결정: 큰 것부터, 박힌 퀴즈는 노션으로)**:
+
+  | # | 화면 | 학년·단원 | 줄(인라인) | 상태 |
+  | :-: | :--- | :--- | ---: | :--- |
+  | F1 | `fractions_decimals` 분수와 소수 | 3-1 6단원 | 770(412) | **끝** (관 4개 + 노션 퀴즈 12제) |
+  | F2 | `big_numbers` 큰 수 | 4-1 1단원 | 592(254) | 다음 |
+  | F3 | `division_concept` 나눗셈 | 3-1 3단원 | 461(225) | |
+  | F4 | `planar_shapes` 평면도형 | 3-1 2단원 | 420(177) | |
+  | F5 | `shape_movement` 도형의 이동 | 4-1 4단원 | 481(172) | |
+  | F6 | `angles_concept` 각도 | 4-1 2단원 | 213 + JS 532 | |
+  | F7 | `length_time` 길이와 시간 | 3-1 5단원 | 238 + JS 532 | |
+
+  방학 뒤로 미룸(아이가 이번 학기에 쓰는 중): 민수 5-2 `ranges_estimation`·`fractions_multiplication`·`fractions_training`·`congruence_symmetry`, 민서 1-2 `shapes`·`clock_rules`·`addition_subtraction_concept`·`number50`.
+- **옮기는 틀**: 옛 활동은 그대로 관으로(다시 설계하지 않음), 관마다 미션 3개로 완료, 박힌 퀴즈는 `scripts/data/curriculum/math_{학년}_{단원}.json` → `register_curriculum.py`로 노션에, 순수 계산은 `{화면}-core.js`(시험), 관은 `{화면}-labs.js`.
 
 ### G. 학습설정 두 아이 몫 중복 저장 정리 — L3 (사용자 사전 승인)
 - 노션 데이터를 옮기는 일이다. 맨 뒤에 하고, 실제 쓰기는 승인을 받은 뒤 1건만 시험하고 되돌려 확인한다.
@@ -90,6 +104,7 @@
 | 날짜 | 묶음 | 결과 |
 | :--- | :--- | :--- |
 | 2026-11-27 | 0 (목록) | 이 문서 작성 |
+| 2026-11-28 | F1 | `fractions_decimals.html`(770줄, 인라인 412줄) → 틀 래퍼 71줄 + `fractions_decimals-core.js`·`-labs.js`·CSS. 옛 활동 4개를 관으로, 관마다 미션 3개. 박힌 번개 퀴즈 6문제 + 새 6문제를 노션 3-1 `6. 분수와 소수` 12행으로 등록. 시험 `math-fractions-decimals3.test.mjs` 9개, 폰 크기에서 1~4관 미션 완료·퀴즈 배틀 채점 확인 |
 | 2026-11-27 | A | `--add-missing`·빠진 자리 시험 추가, HTML 125개의 `?v=` 521곳 채움(하이드로젠 medium 초안, Claude 적용·검수). 버전 글자를 그대로 비교하던 시험 7개를 쿼리 무시로 고침 |
 | 2026-11-27 | B | `kids/data/legacy_backup/`(5개)·`kids/deprecated_backup/`(2개) 지움, 검사 제외 목록·주석 정리. 되살리기: `git checkout 2b7de65b -- kids/data/legacy_backup kids/deprecated_backup` |
 | 2026-11-28 | E | 같은 이름 함수 15개 비교 → 본문이 갈라져 합치지 않음. 사회방 음성이 기계음이던 버그(공용 함수 덮어쓰기) 고침, 「Fairy_」 오타, 덮어쓰기 금지 시험 |

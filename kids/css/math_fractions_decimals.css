@@ -1,0 +1,154 @@
+/* 초등 3학년 분수와 소수 첫걸음 탐험관 전용 스타일 (공용 틀 math_explorer.css 위에 얹음) */
+body.mx-theme-fracdec3 {
+  --mx-head-a: #ffedd5;
+  --mx-head-b: #e0f2fe;
+  --mx-line: #fdba74;
+  --mx-strong: #9a3412;
+  --mx-sub: #0369a1;
+  --mx-accent: #ea580c;
+  --mx-accent-dark: #c2410c;
+  --mx-soft: #ffedd5;
+  --mx-softer: #fff7ed;
+}
+
+.fd-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.fd-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.fd-pick.active {
+  background: var(--mx-accent);
+  border-color: var(--mx-accent-dark);
+  color: #ffffff;
+}
+
+.fd-show {
+  margin: 8px 0 4px;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.45rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--mx-sub);
+  overflow-wrap: anywhere;
+}
+
+.fd-read {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  color: #475569;
+}
+
+/* 미션 상자 */
+.fd-mission {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 2px dashed var(--mx-line);
+  background: var(--mx-softer);
+}
+
+.fd-mission-text {
+  margin: 0;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: var(--mx-strong);
+}
+
+.fd-mission .mx-hint { margin-top: 8px; }
+.fd-next { display: block; margin-top: 10px; }
+
+.fd-mission-count {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--mx-sub);
+}
+
+/* 1관 피자 */
+.fd-pizza-board { max-width: 260px; margin: 6px auto; }
+.fd-pizza-crust { fill: #fed7aa; stroke: #f97316; stroke-width: 3; }
+.fd-slice { fill: #f1f5f9; stroke: #ea580c; stroke-width: 2.5; }
+.fd-slice.on { fill: #fb923c; }
+.fd-pizza-center { fill: #c2410c; }
+
+/* 2관 분수 이름 카드 */
+.fd-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.fd-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.fd-type-card.active,
+.fd-type-card:hover {
+  border-color: #ec4899;
+  background: #fdf2f8;
+  transform: translateY(-2px);
+}
+
+.fd-type-icon { font-size: 1.9rem; }
+.fd-type-name { font-family: 'Jua', 'Noto Sans KR', sans-serif; font-size: 1.2rem; color: #1e293b; }
+.fd-type-tag { font-size: 0.9rem; font-weight: 700; color: #db2777; text-align: center; }
+
+.fd-type-detail {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 2px solid #fbcfe8;
+  background: #fdf2f8;
+}
+
+.fd-type-title {
+  margin: 0 0 6px;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.2rem;
+  color: #be185d;
+}
+
+.fd-type-line { margin: 4px 0; font-size: 1rem; line-height: 1.7; color: #1e293b; }
+
+/* 3·4관 수직선 */
+.fd-line-board { max-width: 560px; margin: 6px auto; }
+.fd-axis { stroke: #334155; stroke-width: 3; }
+.fd-tick { stroke: #64748b; stroke-width: 1.5; }
+.fd-tick.big { stroke: #e11d48; stroke-width: 2.5; }
+.fd-tick-label { font-family: 'Jua', 'Noto Sans KR', sans-serif; font-size: 22px; fill: #e11d48; }
+.fd-tick-label.small { font-size: 18px; fill: #0284c7; }
+.fd-bar { fill: #38bdf8; stroke: #0284c7; stroke-width: 2; }
+.fd-bar.red { fill: #f43f5e; stroke: #be123c; stroke-width: 2.5; }
+.fd-bar-label { font-family: 'Jua', 'Noto Sans KR', sans-serif; font-size: 18px; fill: #ffffff; }
+.fd-guide { stroke-width: 2; stroke-dasharray: 3; }
+.fd-guide.blue, .fd-dot.blue { stroke: #0284c7; fill: #0284c7; }
+.fd-guide.red, .fd-dot.red { stroke: #e11d48; fill: #e11d48; }
+
+@media (max-width: 400px) {
+  .fd-show { font-size: 1.25rem; }
+  .fd-type-name { font-size: 1.05rem; }
+}
