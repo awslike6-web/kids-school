@@ -287,6 +287,8 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "decimal_multiplication-core.js", "path": "kids-school-main/kids/subjects/math/js/decimal_multiplication-core.js", "domain": ["math"], "docs": ["math_4-2_ladder_spec.md", "CORE_CATALOG.md"]},
       {"name": "decimal_multiplication-labs-a.js", "path": "kids-school-main/kids/subjects/math/js/decimal_multiplication-labs-a.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
       {"name": "decimal_multiplication-labs-b.js", "path": "kids-school-main/kids/subjects/math/js/decimal_multiplication-labs-b.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
+      {"name": "division_concept-core.js", "path": "kids-school-main/kids/subjects/math/js/division_concept-core.js", "domain": ["math"], "docs": ["CORE_CATALOG.md", "refactor_batches.md"]},
+      {"name": "division_concept-labs.js", "path": "kids-school-main/kids/subjects/math/js/division_concept-labs.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
       {"name": "fraction5-draw.js", "path": "kids-school-main/kids/subjects/math/js/fraction5-draw.js", "domain": ["math"], "docs": ["math_5-1_fraction_spec.md", "CORE_CATALOG.md"]},
       {"name": "fraction_add-core.js", "path": "kids-school-main/kids/subjects/math/js/fraction_add-core.js", "domain": ["math"], "docs": ["math_4-2_ladder_spec.md", "math_5-1_fraction_spec.md", "CORE_CATALOG.md"]},
       {"name": "fraction_add-labs-a.js", "path": "kids-school-main/kids/subjects/math/js/fraction_add-labs-a.js", "domain": ["math"], "docs": ["math_4-2_ladder_spec.md", "CORE_CATALOG.md"]},

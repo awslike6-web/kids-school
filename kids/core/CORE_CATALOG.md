@@ -504,6 +504,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/subjects/math/js/big_numbers-core.js` (`window.BigNumCore`, 순수 모듈): `PLACES`(천조~일 16자리, 사실과 맞는 비유만)·`comma`(toLocaleString 안 씀)·`korean`(교과서 표기 `5억 4000만`, 조까지)·`placeIndex`·`placeName`(지수 → `천만의 자리`)·`digitRow`·`placeTarget`·`makeSkip(rng, step)`(1000·1만·100만·1억씩, 받아올림 없이 그 자리만 1씩, 오답은 ×10·÷10 걸음)·`makeCompare(rng, kind)`(`digits` 자릿수 다름 / `top` 가장 높은 자리 같고 그다음 다름, `diffPlace`).
 - `kids/subjects/math/js/big_numbers-labs.js` (`window.BigNumLabs`): 1관 자릿값 계수기(조·억·만·일 네 묶음 2×2, 자리 찾기 미션)·2관 뛰어 세기(빈칸 3지선다)·3관 크기 비교(기호 고정 순서 `fixed`) + 퀴즈 배틀(`4-1`·`1. 큰 수`). `kids/css/math_big_numbers.css`(`mx-theme-bignum4`).
 - 퀴즈 자료 `scripts/data/curriculum/math_4-1_1.json`(12제). 시험 `tests/math-big-numbers4.test.mjs`.
+
+### ➗ 3-1 나눗셈 탐험관 (2026-11-28, 옛 화면을 공용 틀로)
+
+옛 `division_concept.html`(461줄, 인라인 225줄·박힌 번개 퀴즈)을 공용 틀로 옮김(묶음 F3). 계단: ⬇ 곱셈구구 연습(`gugudan.html`) · ⬆ 4-1 곱셈과 나눗셈.
+- `kids/subjects/math/js/division_concept-core.js` (`window.DivConceptCore`, 순수 모듈): `threeChoices(정답, 후보)`(정답 먼저·중복·1 미만 빼고 3개)·`makeShare`(접시 2~6 × 몫 2~6, 오답 몫±1·접시 수)·`makeFact`(단 × □ = 수, 오답 몫±1·나누는 수)·`remText`·`makeRemainder`(나머지 0 포함, 오답 1은 몫을 덜 세어 나머지 ≥ 나누는 수인 약속 위반, 오답 2는 계산이 틀림, `check` 검산식).
+- `kids/subjects/math/js/division_concept-labs.js` (`window.DivConceptLabs`): 1관 똑같이 나누기(「한 접시에 하나씩 나눠 주기」를 눌러 다 나눈 뒤 몫 고르기)·2관 곱셈구구 짝꿍·3관 몫과 나머지(3-2 맛보기, 맞히면 친구별 사탕·남은 사탕 그림) + 퀴즈 배틀(`3-1`·`3. 나눗셈`). `kids/css/math_division_concept.css`(`mx-theme-divide3`).
+- 퀴즈 자료 `scripts/data/curriculum/math_3-1_3.json`(12제). 시험 `tests/math-division-concept3.test.mjs`.
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
