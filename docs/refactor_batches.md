@@ -90,8 +90,8 @@
   | F2 | `big_numbers` 큰 수 | 4-1 1단원 | 592(254) | **끝** (관 3개 + 노션 퀴즈 12제) |
   | F3 | `division_concept` 나눗셈 | 3-1 3단원 | 461(225) | **끝** (관 3개 + 노션 퀴즈 12제) |
   | F4 | `planar_shapes` 평면도형 | 3-1 2단원 | 420(177) | **끝** (관 3개 + 노션 퀴즈 12제) |
-  | F5 | `shape_movement` 도형의 이동 | 4-1 4단원 | 481(172) | 다음 |
-  | F6 | `angles_concept` 각도 | 4-1 2단원 | 213 + JS 532 | |
+  | F5 | `shape_movement` 도형의 이동 | 4-1 4단원 | 481(172) | **끝** (관 4개 + 노션 퀴즈 12제) |
+  | F6 | `angles_concept` 각도 | 4-1 2단원 | 213 + JS 532 | 다음 |
   | F7 | `length_time` 길이와 시간 | 3-1 5단원 | 238 + JS 532 | |
 
   방학 뒤로 미룸(아이가 이번 학기에 쓰는 중): 민수 5-2 `ranges_estimation`·`fractions_multiplication`·`fractions_training`·`congruence_symmetry`, 민서 1-2 `shapes`·`clock_rules`·`addition_subtraction_concept`·`number50`.
@@ -108,6 +108,7 @@
 | 2026-11-28 | F2 | `big_numbers.html`(592줄, 인라인 254줄) → 틀 래퍼 71줄 + `big_numbers-core.js`·`-labs.js`·CSS. 16자리 표를 조·억·만·일 네 묶음으로(폰 가로 스크롤 없앰), 뛰어 세기·크기 비교는 무작위 문제로. 틀린 비유 3개 바로잡음. 노션 4-1 `1. 큰 수` 12행 등록. 시험 `math-big-numbers4.test.mjs` 7개, 폰 크기에서 1~3관 완료·완주 창·퀴즈 배틀 확인 |
 | 2026-11-28 | F3 | `division_concept.html`(461줄, 인라인 225줄) → 틀 래퍼 71줄 + `division_concept-core.js`·`-labs.js`·CSS. 관 3개(똑같이 나누기·곱셈구구 짝꿍·몫과 나머지) 무작위 미션, 「3개씩 4접시」 설명 오류 바로잡음. 노션 3-1 `3. 나눗셈` 12행 등록(Q11 해설의 「4번이」가 보기 번호 경고에 걸려 문구 바꿔 그 행만 --update). 시험 `math-division-concept3.test.mjs` 7개, 폰 크기에서 1~3관 완료·완주 창·퀴즈 배틀 확인 |
 | 2026-11-28 | F4 | `planar_shapes.html`(420줄, 인라인 177줄) → 틀 래퍼 71줄 + `planar_shapes-core.js`·`-labs.js`·CSS. 관 3개(선의 3총사·각과 직각·도형 3총사) 무작위 미션, 맞히면 직각 표시. 노션 3-1 `2. 평면도형` 12행 등록(미리보기 경고 확인 후). 시험 `math-planar-shapes3.test.mjs` 6개, 폰 크기에서 1~3관 완료·완주 창·퀴즈 배틀 확인 |
+| 2026-11-28 | F5 | `shape_movement.html`(481줄, 인라인 172줄) → 틀 래퍼 71줄 + `shape_movement-core.js`·`-labs.js`·CSS. 관 4개(밀기·뒤집기·돌리기·무늬 꾸미기), 대칭 없는 F 모양을 칸 좌표로 계산. 확인 중 무늬 규칙 두 개(pinwheel·diagonal)가 같은 무늬를 내던 것 고치고 규칙별 무늬가 다른지 시험 추가. 노션 4-1 `4. 평면도형의 이동` 12행 등록(Q10 「4번」을 「네 번」으로 고친 뒤). 시험 `math-shape-movement4.test.mjs` 10개, 폰 크기에서 1~4관 완료·완주 창·퀴즈 배틀 확인 |
 | 2026-11-27 | A | `--add-missing`·빠진 자리 시험 추가, HTML 125개의 `?v=` 521곳 채움(하이드로젠 medium 초안, Claude 적용·검수). 버전 글자를 그대로 비교하던 시험 7개를 쿼리 무시로 고침 |
 | 2026-11-27 | B | `kids/data/legacy_backup/`(5개)·`kids/deprecated_backup/`(2개) 지움, 검사 제외 목록·주석 정리. 되살리기: `git checkout 2b7de65b -- kids/data/legacy_backup kids/deprecated_backup` |
 | 2026-11-28 | E | 같은 이름 함수 15개 비교 → 본문이 갈라져 합치지 않음. 사회방 음성이 기계음이던 버그(공용 함수 덮어쓰기) 고침, 「Fairy_」 오타, 덮어쓰기 금지 시험 |

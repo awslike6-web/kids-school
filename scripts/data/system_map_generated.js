@@ -340,6 +340,8 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "rule_find-core.js", "path": "kids-school-main/kids/subjects/math/js/rule_find-core.js", "domain": ["math"], "docs": ["math_2-2_rule_spec.md", "CORE_CATALOG.md"]},
       {"name": "rule_find-draw.js", "path": "kids-school-main/kids/subjects/math/js/rule_find-draw.js", "domain": ["math"], "docs": ["math_2-2_rule_spec.md", "CORE_CATALOG.md"]},
       {"name": "rule_find-labs.js", "path": "kids-school-main/kids/subjects/math/js/rule_find-labs.js", "domain": ["math"], "docs": ["math_2-2_rule_spec.md", "CORE_CATALOG.md"]},
+      {"name": "shape_movement-core.js", "path": "kids-school-main/kids/subjects/math/js/shape_movement-core.js", "domain": ["math"], "docs": ["CORE_CATALOG.md", "refactor_batches.md"]},
+      {"name": "shape_movement-labs.js", "path": "kids-school-main/kids/subjects/math/js/shape_movement-labs.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
       {"name": "shapes_logic.js", "path": "kids-school-main/kids/subjects/math/js/shapes_logic.js", "domain": ["math"], "docs": ["learning_log_math_rest_spec.md", "learning_record_spec.md", "math_1_bridge_spec.md"]},
       {"name": "shapes_physics.js", "path": "kids-school-main/kids/subjects/math/js/shapes_physics.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
       {"name": "shapes_stamp.js", "path": "kids-school-main/kids/subjects/math/js/shapes_stamp.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},

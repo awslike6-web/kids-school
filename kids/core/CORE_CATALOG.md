@@ -518,6 +518,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/subjects/math/js/planar_shapes-core.js` (`window.PlanarCore`, 순수 모듈): `letters(n)`(이어진 자음)·`makeLine`(선분·반직선 두 방향·직선, 반직선은 시작점 먼저, 선분·직선은 순서만 바꾼 이름을 오답에 안 넣음)·`makeAngle`(`right` 직각과 비교 — 기호 순서 고정 / `vertex` 꼭짓점 = 가운데 글자, 꼭짓점 문제 연속 없음)·`makeShape`(모눈 칸 2~6, 정사각형 w=h·직사각형 w≠h·직각삼각형 직각 꼭짓점 4방향)·`triPoints`(직각 꼭짓점이 첫째).
 - `kids/subjects/math/js/planar_shapes-labs.js` (`window.PlanarLabs`): 1관 선분·반직선·직선(버튼 4개 그림 + 이름 맞히기)·2관 각과 직각(맞히면 직각 표시)·3관 도형 3총사(카드 + 모눈 도형 이름, 맞히면 직각 표시) + 퀴즈 배틀(`3-1`·`2. 평면도형`). 화살촉은 SVG 다각형(marker id 겹침 없음). `kids/css/math_planar_shapes.css`(`mx-theme-planar3`).
 - 퀴즈 자료 `scripts/data/curriculum/math_3-1_2.json`(12제). 시험 `tests/math-planar-shapes3.test.mjs`.
+
+### 🔄 4-1 평면도형의 이동 탐험관 (2026-11-28, 옛 화면을 공용 틀로)
+
+옛 `shape_movement.html`(481줄, 인라인 172줄·박힌 번개 퀴즈)을 공용 틀로 옮김(묶음 F5). 계단: ⬇ 3-1 평면도형 · ⬆ 5-2 합동과 대칭.
+- `kids/subjects/math/js/shape_movement-core.js` (`window.MoveCore`, 순수 모듈): `SHAPE`(대칭 없는 F 모양 — 뒤집기·돌리기 8가지 결과가 모두 다름)·`OPS`(움직임 이름)·`apply(점들, 움직임)`(화면 좌표 y 아래, `cw90`은 위쪽 → 오른쪽)·`key`/`same`(꼭짓점 집합 비교)·`bounds`·`normalize`·`makeSlide`(판 안에 남는 방향·1~4칸)·`makeFlipQuiz`/`makeTurnQuiz`(처음 → 나중, 같은 결과가 나오는 움직임은 보기에 함께 두지 않음: 오른쪽·왼쪽 뒤집기, 시계 270°·반대 90°)·`PATTERN_RULES`/`makePattern`(3×3 무늬, 규칙마다 무늬가 다름).
+- `kids/subjects/math/js/shape_movement-labs.js` (`window.MoveLabs`): 1관 밀기(방향 버튼으로 n칸 밀기, 처음 자리 점선)·2관 뒤집기·3관 돌리기(둘러보기 버튼 + 처음 → 나중 고르기)·4관 무늬 꾸미기(보기 무늬대로 타일 돌리기) + 퀴즈 배틀(`4-1`·`4. 평면도형의 이동`). `kids/css/math_shape_movement.css`(`mx-theme-move4`).
+- 퀴즈 자료 `scripts/data/curriculum/math_4-1_4.json`(12제). 시험 `tests/math-shape-movement4.test.mjs`.
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 

@@ -1,0 +1,133 @@
+/* 초등 4학년 평면도형의 이동 탐험관 전용 스타일 (공용 틀 math_explorer.css 위에 얹음) */
+body.mx-theme-move4 {
+  --mx-head-a: #eef2ff;
+  --mx-head-b: #fce7f3;
+  --mx-line: #a5b4fc;
+  --mx-strong: #3730a3;
+  --mx-sub: #be185d;
+  --mx-accent: #6366f1;
+  --mx-accent-dark: #4f46e5;
+  --mx-soft: #e0e7ff;
+  --mx-softer: #eef2ff;
+}
+
+.sm-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.sm-next { display: block; margin-top: 8px; }
+
+.sm-mission-text {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 2px dashed var(--mx-line);
+  background: var(--mx-softer);
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1.15rem;
+  color: var(--mx-strong);
+}
+
+.sm-mission-count {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--mx-sub);
+}
+
+.sm-note {
+  margin: 6px 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--mx-strong);
+}
+
+.sm-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* 그림판 */
+.sm-slide-board { max-width: 340px; margin: 8px auto; }
+.sm-play-board { max-width: 200px; margin: 8px auto; }
+.sm-small-board { max-width: 150px; margin: 0 auto; }
+.sm-grid { stroke: #e2e8f0; stroke-width: 1; }
+.sm-shape { fill: #f43f5e; stroke: #be123c; stroke-width: 2.5; stroke-linejoin: round; }
+.sm-shape.ghost { fill: none; stroke: #94a3b8; stroke-dasharray: 4 3; }
+.sm-shape.after { fill: #8b5cf6; stroke: #6d28d9; }
+
+/* 1관 방향 버튼 */
+.sm-pad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  max-width: 320px;
+  margin: 6px auto 0;
+}
+
+.sm-arrow { width: 100%; }
+
+/* 2·3관 처음 → 나중 */
+.sm-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sm-pair-box {
+  padding: 6px;
+  border-radius: 14px;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.sm-pair-label {
+  margin: 0 0 4px;
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  font-size: 1rem;
+  text-align: center;
+  color: #475569;
+}
+
+/* 4관 타일 무늬 */
+.sm-pattern-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sm-pattern {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 6px;
+  border-radius: 12px;
+  background: #e2e8f0;
+}
+
+.sm-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  padding: 4px;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.sm-tile.goal { cursor: default; border-style: dashed; }
+.sm-tile.ok { border-color: #10b981; }
+.sm-tile-svg { width: 100%; height: 100%; }
+.sm-tile-tri { fill: #10b981; }
+.sm-tile-dot { fill: #fde047; }
