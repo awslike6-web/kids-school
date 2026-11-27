@@ -11,6 +11,13 @@
     const S = R._state;
     const { getArrangedItems, getActiveReportData, getUnitTheme, renderEquilibriumGraphSvg } = R._helpers;
 
+    // 🔊 채점 소리 — 정답 fairyPraise, 오답 fairyEncourage, 완주 fairyReward (헌법 §6 3단계, 2026-11-28 추가: 그전엔 소리가 없었음)
+    function playQuizSound(name) {
+        const fn = window[name];
+        if (typeof fn !== 'function') return;
+        try { fn(); } catch (e) { console.warn(`[ScienceReport] ${name} 실패`, e); }
+    }
+
     function renderLabReportQuiz(container, qIdx) {
         const data = getActiveReportData();
         if (!data || !data.quizItems || !data.quizItems[qIdx]) return;
@@ -270,6 +277,7 @@
         }
 
         if (isCorrect) {
+            playQuizSound('fairyPraise');
             showQuizFeedback(container, true, `정답입니다! 👏 ${q.explanation}`, () => {
                 S.userBlankAnswers = {};
                 renderLabReportQuiz(container, qIdx + 1);
@@ -277,6 +285,7 @@
         } else {
             const expectedGuide = blanks.map((b, i) => `빈칸 ${i + 1}(${b.target}): <b>[${b.answer}]</b>`).join(', ');
             const hintMsg = `앗! 일부 빈칸이 비어 있거나 순서가 바뀌었어요.<br>💡 <b>정답 힌트</b>: ${expectedGuide}`;
+            playQuizSound('fairyEncourage');
             showQuizFeedback(container, false, hintMsg, () => {
                 renderLabReportQuiz(container, qIdx);
             });
@@ -295,10 +304,12 @@
         }
 
         if (isCorrect) {
+            playQuizSound('fairyPraise');
             showQuizFeedback(container, true, `정답입니다! 🎉 ${q.explanation}`, () => {
                 renderLabReportQuiz(container, qIdx + 1);
             });
         } else {
+            playQuizSound('fairyEncourage');
             showQuizFeedback(container, false, `오답입니다! 💡 ${q.explanation}`, () => {
                 renderLabReportQuiz(container, qIdx);
             });
@@ -345,12 +356,14 @@
             else track.wrong(S.userOrderPicks.map(p => p.id).join('-'));
         }
         if (isCorrect) {
+            playQuizSound('fairyPraise');
             showQuizFeedback(container, true, `실험 순서 조립 성공! 🧪 ${q.explanation}`, () => {
                 S.userOrderPicks = [];
                 S.lastOrderQuizKey = '';
                 renderLabReportQuiz(container, qIdx + 1);
             });
         } else {
+            playQuizSound('fairyEncourage');
             showQuizFeedback(container, false, `실험 순서가 조금 뒤바뀌었어요! 💡 1단계는 <b>"${q.steps[0].text}"</b>부터 시작해야 해요. 다시 조립해 볼까요?`, () => {
                 S.userOrderPicks = [];
                 renderLabReportQuiz(container, qIdx);
@@ -405,6 +418,7 @@
     function finishAllReportQuiz() {
         const data = getActiveReportData() || {};
         const th = getUnitTheme(data);
+        playQuizSound('fairyReward');
         if (typeof grantRewardGem === 'function') {
             const rewardMsg = data.rewardMsg || (S.currentReportUnitId === 3
                 ? '3단원 열과 우리 생활 실험연계 탐구 보고서 완벽 마스터'

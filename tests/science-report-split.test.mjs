@@ -59,3 +59,49 @@ test('상태 변수는 공유 객체로만 쓴다 (두 파일에 let 사본이 �
         }
     }
 });
+
+test('채점 소리: 정답 fairyPraise, 오답 fairyEncourage, 완주 fairyReward를 채점 코드에서 직접 부른다 (헌법 §6)', () => {
+    const calls = [];
+    const el = () => ({ innerHTML: '', style: {}, classList: { add() {}, remove() {} } });
+    const ctx = {
+        console,
+        document: { getElementById: () => el(), querySelector: () => null, querySelectorAll: () => [] },
+        fairyPraise: () => calls.push('praise'),
+        fairyEncourage: () => calls.push('encourage'),
+        fairyReward: () => calls.push('reward'),
+        SCIENCE_LAB_REPORT_DATA: { quizItems: [
+            { type: 'choice', choices: ['혼합물', '순물질'], answer: 0, explanation: '' },
+            { type: 'blank', blanks: [{ id: 'b1', target: '가', answer: '증발' }], explanation: '' },
+            { type: 'order', steps: [{ id: 1, text: '하나' }, { id: 2, text: '둘' }], explanation: '' }
+        ] }
+    };
+    ctx.window = ctx;
+    vm.createContext(ctx);
+    vm.runInContext(read(DOC), ctx);
+    vm.runInContext(read(QUIZ), ctx);
+    const R = ctx.ScienceReport;
+    R.submitChoiceQuiz(0, 1);
+    R.submitChoiceQuiz(0, 0);
+    assert.deepEqual(calls.splice(0), ['encourage', 'praise']);
+    R.checkBlankAnswer(1); // 빈칸 비어 있음 → 오답
+    R.selectBlankWord('증발');
+    R.checkBlankAnswer(1);
+    assert.deepEqual(calls.splice(0), ['encourage', 'praise']);
+    R._state.userOrderPicks = [{ id: 2 }, { id: 1 }];
+    R.checkOrderQuiz(2);
+    R._state.userOrderPicks = [{ id: 1 }, { id: 2 }];
+    R.checkOrderQuiz(2);
+    assert.deepEqual(calls.splice(0), ['encourage', 'praise']);
+    R.finishAllQuiz();
+    assert.deepEqual(calls, ['reward']);
+});
+
+test('요정 엔진이 없는 곳에서도 채점은 조용히 된다', () => {
+    const ctx = { console, document: { getElementById: () => ({ innerHTML: '' }) },
+        SCIENCE_LAB_REPORT_DATA: { quizItems: [{ type: 'choice', choices: ['가', '나'], answer: 0, explanation: '' }] } };
+    ctx.window = ctx;
+    vm.createContext(ctx);
+    vm.runInContext(read(DOC), ctx);
+    vm.runInContext(read(QUIZ), ctx);
+    assert.doesNotThrow(() => ctx.ScienceReport.submitChoiceQuiz(0, 0));
+});
