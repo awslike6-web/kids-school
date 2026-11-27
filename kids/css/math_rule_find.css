@@ -1,0 +1,504 @@
+/* 2-2 규칙 찾기 탐험관: 초록·노랑 테마 + 무늬 줄·쌓기나무·덧셈표·곱셈표·자리 표·타일 퍼즐·빙고 (docs/math_2-2_rule_spec.md §3~§4) */
+/* hidden 속성이 아래 display 규칙(flex·grid)에 덮이지 않게 */
+body.mx-theme-rule2 [hidden] { display: none !important; }
+
+body.mx-theme-rule2 {
+  --mx-head-a: #dcfce7;
+  --mx-head-b: #fef9c3;
+  --mx-line: #86efac;
+  --mx-strong: #166534;
+  --mx-sub: #a16207;
+  --mx-accent: #16a34a;
+  --mx-accent-dark: #15803d;
+  --mx-soft: #dcfce7;
+  --mx-softer: #f0fdf4;
+  --rf-cube: 20px;
+  --rf-cell-bg: #ffffff;
+  --rf-cell-line: #86efac;
+  --rf-blank-bg: #fef9c3;
+  --rf-blank-line: #ca8a04;
+  --rf-blank-ink: #a16207;
+  --rf-cube-bg: #4ade80;
+  --rf-cube-top: #86efac;
+  --rf-cube-side: #16a34a;
+  --rf-cube-line: #15803d;
+  --rf-arrow-ink: #15803d;
+  --rf-table-outer: #16a34a;
+  --rf-table-line: #cbd5e1;
+  --rf-th-bg: #dcfce7;
+  --rf-th-ink: #166534;
+  --rf-mark-bg: #fef08a;
+  --rf-mark-ink: #854d0e;
+  --rf-star-bg: #fef9c3;
+  --rf-star-line: #ca8a04;
+  --rf-star-ink: #a16207;
+  --rf-dir-bg: #16a34a;
+  --rf-dir-ink: #ffffff;
+  --rf-tile-bg: #ffffff;
+  --rf-tile-line: #bbf7d0;
+  --rf-tile-empty-bg: #f0fdf4;
+  --rf-tile-empty-line: #86efac;
+  --rf-tile-cur-bg: #fef9c3;
+  --rf-tile-cur-line: #ca8a04;
+  --rf-tile-filled-bg: #dcfce7;
+  --rf-tile-filled-line: #16a34a;
+  --rf-pal-bg: #ffffff;
+  --rf-pal-line: #86efac;
+  --rf-fact-bg: #fefce8;
+  --rf-fact-line: #facc15;
+  --rf-fact-ink: #713f12;
+  --rf-stamp-bg: #ffffff;
+  --rf-stamp-on-bg: #dcfce7;
+  --rf-stamp-on-line: #16a34a;
+}
+
+/* 1관: 무늬 줄 (300px 안 한 줄, 9칸 기준 칸 32px 이상, 이모지 26px 이상) */
+.rf-row {
+  display: grid;
+  gap: 1px;
+  width: 100%;
+  max-width: 300px;
+  margin: 8px auto;
+  box-sizing: border-box;
+}
+
+.rf-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 40px;
+  padding: 4px 0;
+  border-radius: 8px;
+  border: 1.5px solid var(--rf-cell-line, #86efac);
+  background: var(--rf-cell-bg, #ffffff);
+  font-size: 26px;
+  line-height: 1;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.rf-cell.is-blank {
+  border: 2px dashed var(--rf-blank-line, #ca8a04);
+  background: var(--rf-blank-bg, #fef9c3);
+  color: var(--rf-blank-ink, #a16207);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+/* 1관: 무늬 그림 보기 (가로 3칸, 큰 이모지) */
+body.mx-theme-rule2 .rf-pic-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+  margin: 12px auto 0;
+  box-sizing: border-box;
+}
+
+body.mx-theme-rule2 .rf-pic-choices .mx-choice {
+  min-width: 0;
+  min-height: 56px;
+  padding: 8px 4px;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+/* 2관: 쌓기나무 앞모습 (모양 4개 + '?'까지 300px 한 줄) */
+.rf-stacks {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  max-width: 300px;
+  margin: 10px auto;
+  box-sizing: border-box;
+}
+
+.rf-stacks.is-dense {
+  --rf-cube: 17px;
+}
+
+.rf-stack-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+.rf-stack {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+}
+
+.rf-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0;
+}
+
+.rf-cube {
+  width: var(--rf-cube, 20px);
+  height: var(--rf-cube, 20px);
+  background: var(--rf-cube-bg, #4ade80);
+  border: 1.5px solid var(--rf-cube-line, #15803d);
+  border-radius: 3px;
+  box-shadow: inset 0 3px 0 var(--rf-cube-top, #86efac), inset -3px 0 0 var(--rf-cube-side, #16a34a);
+  box-sizing: border-box;
+}
+
+.rf-stack-name {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--mx-strong, #166534);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.rf-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 14px;
+  margin-bottom: 18px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--rf-arrow-ink, #15803d);
+  user-select: none;
+}
+
+.rf-stacks.is-dense .rf-arrow {
+  width: 11px;
+  font-size: 11px;
+}
+
+.rf-stack-q {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--rf-cube, 20px) + 4px);
+  height: calc(var(--rf-cube, 20px) + 4px);
+  border: 2px dashed var(--rf-blank-line, #ca8a04);
+  border-radius: 6px;
+  background: var(--rf-blank-bg, #fef9c3);
+  color: var(--rf-blank-ink, #a16207);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+/* 3관·4관: 덧셈표·곱셈표 (5칸 한 줄, 최대 280px, 칸 44~52px) */
+.rf-table {
+  width: 100%;
+  max-width: 280px;
+  margin: 8px auto;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: var(--rf-cell-bg, #ffffff);
+  border: 2px solid var(--rf-table-outer, #16a34a);
+  box-sizing: border-box;
+}
+
+.rf-table th,
+.rf-table td {
+  height: 46px;
+  padding: 2px;
+  border: 1px solid var(--rf-table-line, #cbd5e1);
+  text-align: center;
+  vertical-align: middle;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--mx-ink, #1e293b);
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.rf-table th.rf-th {
+  background: var(--rf-th-bg, #dcfce7);
+  color: var(--rf-th-ink, #166534);
+  font-weight: 900;
+}
+
+.rf-table td {
+  position: relative;
+}
+
+.rf-table td.is-mark {
+  background: var(--rf-mark-bg, #fef08a);
+  color: var(--rf-mark-ink, #854d0e);
+}
+
+.rf-table td.rf-star,
+.rf-table td.rf-blank {
+  background: var(--rf-star-bg, #fef9c3);
+  color: var(--rf-star-ink, #a16207);
+  border: 2.5px solid var(--rf-star-line, #ca8a04);
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.rf-dir {
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 2px;
+  border-radius: 999px;
+  background: var(--rf-dir-bg, #16a34a);
+  color: var(--rf-dir-ink, #ffffff);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* 5관: 자리 번호 표 (머리 포함 7칸 × 40px = 280px) */
+.rf-seats {
+  width: 100%;
+  max-width: 280px;
+  margin: 8px auto;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: var(--rf-cell-bg, #ffffff);
+  border: 2px solid var(--rf-table-outer, #16a34a);
+  box-sizing: border-box;
+}
+
+.rf-seats th,
+.rf-seats td {
+  height: 40px;
+  padding: 2px;
+  border: 1px solid var(--rf-table-line, #cbd5e1);
+  text-align: center;
+  vertical-align: middle;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--mx-ink, #1e293b);
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.rf-seats th.rf-th {
+  background: var(--rf-th-bg, #dcfce7);
+  color: var(--rf-th-ink, #166534);
+  font-weight: 900;
+}
+
+.rf-seats td.is-mark {
+  background: var(--rf-mark-bg, #fef08a);
+  color: var(--rf-mark-ink, #854d0e);
+}
+
+.rf-seats td.rf-blank {
+  background: var(--rf-blank-bg, #fef9c3);
+  color: var(--rf-blank-ink, #a16207);
+  border: 2.5px solid var(--rf-blank-line, #ca8a04);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+/* 6관: 무늬 타일 퍼즐 판 + 팔레트 */
+.rf-puzzle {
+  width: 100%;
+  max-width: 280px;
+  margin: 8px auto;
+  box-sizing: border-box;
+}
+
+.rf-board {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  max-width: 256px;
+  margin: 0 auto 12px;
+  box-sizing: border-box;
+}
+
+.rf-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border-radius: 10px;
+  border: 2px solid var(--rf-tile-line, #bbf7d0);
+  background: var(--rf-tile-bg, #ffffff);
+  font-family: inherit;
+  font-size: 26px;
+  line-height: 1;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.rf-tile.is-empty {
+  border: 2px dashed var(--rf-tile-empty-line, #86efac);
+  background: var(--rf-tile-empty-bg, #f0fdf4);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.12s ease;
+}
+
+.rf-tile.is-empty.is-current {
+  border: 3px solid var(--rf-tile-cur-line, #ca8a04);
+  background: var(--rf-tile-cur-bg, #fef9c3);
+  box-shadow: 0 0 0 3px var(--rf-mark-bg, #fef08a);
+}
+
+.rf-tile.is-filled {
+  border: 2px solid var(--rf-tile-filled-line, #16a34a);
+  background: var(--rf-tile-filled-bg, #dcfce7);
+  cursor: default;
+}
+
+.rf-tile.is-filled:disabled {
+  opacity: 1;
+  color: inherit;
+}
+
+.rf-puzzle.is-locked .rf-tile.is-empty,
+.rf-puzzle.is-locked .rf-pal-btn {
+  cursor: default;
+}
+
+.rf-palette {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  max-width: 256px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.rf-pal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  margin: 0;
+  padding: 6px;
+  border-radius: 14px;
+  border: 2px solid var(--rf-pal-line, #86efac);
+  background: var(--rf-pal-bg, #ffffff);
+  font-family: inherit;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.12s ease, border-color 0.15s ease, background-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.rf-pal-btn:hover:not(:disabled) {
+  border-color: var(--mx-accent, #16a34a);
+  background: var(--mx-softer, #f0fdf4);
+  transform: translateY(-1px);
+}
+
+.rf-pal-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+/* 안내표 (문제 위 한 줄) */
+.rf-fact {
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 2px solid var(--rf-fact-line, #facc15);
+  background: var(--rf-fact-bg, #fefce8);
+  color: var(--rf-fact-ink, #713f12);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* 6관: 퍼즐 도장 줄 */
+.rf-stamps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+  margin: 8px auto;
+  box-sizing: border-box;
+}
+
+.rf-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px dashed var(--mx-line, #86efac);
+  background: var(--rf-stamp-bg, #ffffff);
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.rf-stamp.is-on {
+  border-style: solid;
+  border-color: var(--rf-stamp-on-line, #16a34a);
+  background: var(--rf-stamp-on-bg, #dcfce7);
+}
+
+/* 버튼 줄 */
+.rf-btns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+  margin: 10px auto 0;
+  box-sizing: border-box;
+}
+
+.rf-btns .mx-btn {
+  flex: 1 1 92px;
+  min-height: 56px;
+}
+
+/* 7관: 규칙 빙고 칸 */
+body.mx-theme-rule2 .mx-bingo-cell,
+body.mx-theme-rule2 .mx-bingo-chip {
+  word-break: keep-all;
+  font-size: 0.95rem;
+  line-height: 1.15;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-tile.is-empty,
+  .rf-pal-btn,
+  .rf-stamp {
+    transition: none;
+  }
+}
