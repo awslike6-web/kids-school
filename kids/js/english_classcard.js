@@ -4,7 +4,7 @@
 // - 실제 앱과 다른 점은 시간제한(없음·천천히·기본)과 안심 모드(감점·잠금 없음)뿐이다. 아이가 구조에 익숙해지는 것이 목적.
 // - 이 파일: 공용 도구·저장 상태·소리·보상 연결·화면 전환(로비·결과·안내창).
 //   매칭 격자는 english_classcard_grid.js(EnglishClasscard.Grid), 테스트 카드 퀴즈는 english_classcard_cards.js(EnglishClasscard.Cards).
-// - 카드 묶음은 kids/subjects/english/data/classcard_<학년>_L<단원>.js(window.CLASSCARD_DECK). 명세: docs/english_spec.md §2-3.
+// - 카드 묶음은 노션 「클래스카드 DB」에서 english_classcard_deck.js(EnglishClasscard.Deck)가 받아 init(deck)으로 넘긴다. 명세: docs/english_spec.md §2-3.
 (function () {
     'use strict';
 
@@ -55,7 +55,8 @@
         bestScore: 0,
         unlocked: false,       // 1,500점을 한 번 넘으면 계속 열림 (실제 앱과 같음)
         preview: false,        // 부모 미리보기 잠금해제
-        bookmarks: [],         // 별표 카드 id
+        bookmarks: [],         // 별표 카드 id (지금 묶음에 있는 카드)
+        hiddenBookmarks: [],   // 부모가 노션에서 「사용」을 꺼서 지금 묶음에 없는 카드의 별표 — 다시 켜면 돌아오게 지우지 않고 둔다
         passRewardDate: '',    // 매칭 통과 보상을 받은 날 (하루 한 번)
         spellTyping: 'tiles',  // 2단계 철자 타이핑 비중
         keyGuide: 'stuck',     // 타이핑 자판 위치 안내 (기본: 막히면 반짝이기)
@@ -73,6 +74,7 @@
                 if (!CONFIG.KEY_GUIDE.includes(this.keyGuide)) this.keyGuide = 'stuck';
                 if (!Array.isArray(this.bookmarks)) this.bookmarks = [];
                 const ids = new Set(this.deck.items.map(i => i.id));
+                this.hiddenBookmarks = this.bookmarks.filter(id => !ids.has(id));
                 this.bookmarks = this.bookmarks.filter(id => ids.has(id));
                 // 카드 묶음을 고쳐 구간이 없어졌거나 값이 깨졌으면 전체로
                 const sectionIds = this.deck.sections.map(s => String(s.id));
@@ -83,11 +85,11 @@
         save() {
             const { section, timerMode, errorless, bestScore, unlocked, preview, bookmarks, passRewardDate, spellTyping, keyGuide } = this;
             try {
-                localStorage.setItem(this.key(), JSON.stringify({ section, timerMode, errorless, bestScore, unlocked, preview, bookmarks, passRewardDate, spellTyping, keyGuide }));
+                localStorage.setItem(this.key(), JSON.stringify({ section, timerMode, errorless, bestScore, unlocked, preview, bookmarks: bookmarks.concat(this.hiddenBookmarks), passRewardDate, spellTyping, keyGuide }));
             } catch (e) { /* 저장 불가 기기에서는 이번 열람 동안만 유지 */ }
         },
         reset() {
-            this.bestScore = 0; this.unlocked = false; this.preview = false; this.bookmarks = []; this.section = 'all';
+            this.bestScore = 0; this.unlocked = false; this.preview = false; this.bookmarks = []; this.hiddenBookmarks = []; this.section = 'all';
             this.save();
         },
         activeItems() {

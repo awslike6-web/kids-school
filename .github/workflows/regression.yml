@@ -46,7 +46,7 @@ jobs:
           fi
       - name: 어휘·교재 등록기 시험 (노션 미접속)
         # 이 목록은 scripts/ci_local.py(PY_UNITTESTS)와 같아야 한다 — 푸시 전 훅이 같은 검사를 로컬에서 돌린다
-        run: python -X utf8 -m unittest scripts/test_register_voca.py scripts/test_register_curriculum.py scripts/test_ci_local.py scripts/test_version_stamp.py
+        run: python -X utf8 -m unittest scripts/test_register_voca.py scripts/test_register_curriculum.py scripts/test_register_classcard.py scripts/test_ci_local.py scripts/test_version_stamp.py
       - name: 커밋 메시지 형식 검사 (Agent·교정 줄)
         env:
           BEFORE: ${{ github.event.before }}

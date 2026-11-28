@@ -1,12 +1,14 @@
 // tests/english-classcard.test.mjs
 // 영어 「클래스카드 연습」(classcard.html · english_classcard*.js) 회귀 시험. 노션·DOM 없이 돈다.
-// - 카드 묶음: 담임 클래스카드 글자 그대로(뜻 교정 없음), id 중복 없음, 기호가 든 카드는 읽을 글자(say)가 있음
+// - 카드 묶음(노션 「클래스카드 DB」 → english_classcard_deck.js): 담임 클래스카드 글자 그대로(뜻 교정 없음), 카드번호 그대로,
+//   「사용」 끈 카드·빈 구간 빠짐, 아이별 거르기, 통신 실패 시 기기 기억, 영어방 단원 목록. 등록 자료는 scripts/data/classcard/
 // - 2×4 짝맞추기 판: 몇 번을 맞혀도 같은 열에 같은 카드가 없고, 맞출 수 있는 짝이 늘 2쌍 이상
 // - 카드 퀴즈 문제 만들기: 6지선다 보기·철자 문제 고르기·조각 나누기
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import vm from 'node:vm';
+import { installSeedDeck, seedPages, readSeed, DECK_FILE } from './classcard-seed.mjs';
 
 const base = new URL('../', import.meta.url);
 const read = rel => readFileSync(new URL(rel, base), 'utf8');
@@ -22,10 +24,10 @@ function sandbox() {
   };
   ctx.window = ctx;
   vm.createContext(ctx);
-  for (const f of ['kids/subjects/english/data/classcard_5-2_L11.js', 'kids/js/english_classcard.js',
-    'kids/js/english_classcard_grid.js', 'kids/js/english_classcard_cards.js']) {
+  for (const f of ['kids/js/english_classcard.js', 'kids/js/english_classcard_grid.js', 'kids/js/english_classcard_cards.js']) {
     vm.runInContext(read(f), ctx, { filename: f });
   }
+  installSeedDeck(ctx);  // 등록 자료 → 노션 행 모양 → 실제 Deck.buildDeck (tests/classcard-seed.mjs)
   return ctx;
 }
 
@@ -41,13 +43,15 @@ function seeded(seed) {
   };
 }
 
-test('카드 묶음: 클래스카드 34개를 글자 그대로 담는다', () => {
+test('카드 묶음: 노션 「사용」 카드 34장을 글자 그대로, 사용 끈 4구간(새 문장)은 빠진다', () => {
   const { CLASSCARD_DECK: deck } = sandbox();
   assert.equal(deck.grade, '5-2');
   assert.equal(deck.unit, 'L11');
+  assert.equal(deck.title, '5-2 Lesson 11');
   assert.equal(deck.items.length, 34);
-  assert.equal(new Set(deck.items.map(i => i.id)).size, 34, 'id 중복');
+  assert.deepEqual([...deck.items.map(i => i.id)], Array.from({ length: 34 }, (_, i) => i + 1), '카드번호(별표·문항기록 키) 그대로');
   const bySection = id => deck.items.filter(i => i.section === id).length;
+  assert.deepEqual([...deck.sections.map(s => s.label)], ['1구간', '2구간', '3구간'], '카드가 없는 4구간은 숨김');
   assert.equal(deck.sections.map(s => bySection(s.id)).join(','), '10,10,14');
   const ko = en => deck.items.find(i => i.en === en).ko;
   // 선생님 카드 뜻을 고치지 않는다 (2026-11-22 사용자 지시)
@@ -56,22 +60,139 @@ test('카드 묶음: 클래스카드 34개를 글자 그대로 담는다', () =>
   for (const item of deck.items) {
     assert.ok(item.en && item.ko, `빈 칸: ${item.id}`);
     if (/[{}~/]/.test(item.en)) assert.ok(item.say && !/[{}~/]/.test(item.say), `읽을 글자(say) 필요: ${item.en}`);
+    else assert.equal(item.say, undefined, `읽기 빈 칸은 say를 만들지 않음: ${item.en}`);
   }
 });
 
-test('단원 특별 활동 등록표: L11 클래스카드가 카드 묶음 파일을 가리키고, 길 찾기 활동은 그대로', () => {
+test('카드 묶음: 노션에서 4구간을 켜면 4구간이 생기고, 1구간을 다 끄면 1구간이 숨는다', () => {
+  const { Deck } = sandbox().EnglishClasscard;
+  const on = Object.fromEntries(Array.from({ length: 10 }, (_, i) => [35 + i, true]));
+  const withNew = Deck.buildDeck(seedPages(undefined, on), { grade: '5-2', unit: 'L11', students: ['민수'] });
+  assert.deepEqual([...withNew.sections.map(s => s.id)], [1, 2, 3, 4]);
+  assert.equal(withNew.items.length, 44);
+  assert.equal(withNew.items.at(-1).en, 'It is next to the rocks.');
+  const off = Object.fromEntries(Array.from({ length: 10 }, (_, i) => [1 + i, false]));
+  const noFirst = Deck.buildDeck(seedPages(undefined, off), { grade: '5-2', unit: 'L11', students: ['민수'] });
+  assert.deepEqual([...noFirst.sections.map(s => s.id)], [2, 3]);
+  assert.ok(!noFirst.items.some(i => i.id <= 10));
+});
+
+test('카드 묶음: 다른 단원·다른 아이 카드는 빼고, 순번대로 놓고, 같은 카드번호 두 줄은 하나만', () => {
+  const { Deck } = sandbox().EnglishClasscard;
+  const pages = seedPages();
+  const other = seedPages({ grade: '5-2', unit: 'L12', student: '민수', cards: [{ no: 1, section: 1, en: 'x', ko: 'y' }] });
+  assert.equal(Deck.buildDeck(pages.concat(other), { grade: '5-2', unit: 'L12', students: ['민수'] }), null, '4장보다 적으면 null');
+  assert.equal(Deck.buildDeck(pages, { grade: '5-2', unit: 'L11', students: ['민서', '공통'] }), null, '민서는 민수 카드를 안 봄');
+  const common = seedPages({ ...readSeed(), student: '공통' });
+  assert.equal(Deck.buildDeck(common, { grade: '5-2', unit: 'L11', students: ['민서', '공통'] }).items.length, 34);
+  // 순번을 바꾸면 구간 안 순서가 바뀐다 (카드번호는 그대로)
+  pages[0].properties.순번.number = 99;
+  const moved = Deck.buildDeck(pages.concat([structuredClone(pages[1])]), { grade: '5-2', unit: 'L11', students: ['민수'] });
+  const first = moved.items.filter(i => i.section === 1).map(i => i.id);
+  assert.deepEqual(first.slice(0, 2), [2, 3]);
+  assert.equal(first.at(-1), 1);
+  assert.equal(moved.items.filter(i => i.id === 2).length, 1);
+});
+
+function deckSandbox({ store = {}, fetchImpl }) {
+  const calls = [];
+  const ctx = {
+    console: { log() {}, warn() {}, error() {} },
+    APP_CONFIG: { WORKER_PROXY_URL: 'https://proxy.test/', CLASSCARD_DB_ID: 'cc-db' },
+    localStorage: {
+      getItem: k => (k in store ? store[k] : null),
+      setItem: (k, v) => { store[k] = String(v); },
+      removeItem: k => { delete store[k]; }
+    },
+    AbortController, setTimeout, clearTimeout,
+    fetch: async (url, opt) => { calls.push({ url, body: JSON.parse(opt.body) }); return fetchImpl(url, opt); }
+  };
+  ctx.window = ctx;
+  vm.createContext(ctx);
+  vm.runInContext(read(DECK_FILE), ctx, { filename: DECK_FILE });
+  return { Deck: ctx.EnglishClasscard.Deck, calls, store };
+}
+const okJson = results => async () => ({ ok: true, json: async () => ({ results, has_more: false }) });
+const plain = v => JSON.parse(JSON.stringify(v));
+
+test('불러오기: 노션을 ?force=true로 새로 읽고 「사용」 카드만 거른 뒤 기기에 기억한다', async () => {
+  const { Deck, calls, store } = deckSandbox({ store: { currentUser: 'son' }, fetchImpl: okJson(seedPages()) });
+  const got = await Deck.load({ grade: '5-2', unit: 'L11' });
+  assert.equal(got.from, 'notion');
+  assert.equal(got.deck.items.length, 34);
+  assert.equal(calls[0].url, 'https://proxy.test/v1/databases/cc-db/query?force=true');
+  assert.deepEqual(plain(calls[0].body.filter.and), [
+    { property: '학년', select: { equals: '5-2' } },
+    { property: '단원', select: { equals: 'L11' } },
+    { property: '사용', checkbox: { equals: true } }]);
+  assert.equal(JSON.parse(store['classcard_deck_v1_son_5-2_L11']).deck.items.length, 34);
+});
+
+test('불러오기: 통신이 안 되면 기억한 묶음, 기억도 없으면 none, 노션에 카드가 없으면 기억을 지운다', async () => {
+  const fail = async () => { throw new Error('offline'); };
+  const store = { currentUser: 'son' };
+  await deckSandbox({ store, fetchImpl: okJson(seedPages()) }).Deck.load({ grade: '5-2', unit: 'L11' });
+  const cached = await deckSandbox({ store, fetchImpl: fail }).Deck.load({ grade: '5-2', unit: 'L11' });
+  assert.equal(cached.from, 'cache');
+  assert.equal(cached.deck.items.length, 34);
+  const other = await deckSandbox({ store: { currentUser: 'daughter' }, fetchImpl: fail }).Deck.load({ grade: '5-2', unit: 'L11' });
+  assert.equal(other.from, 'none', '아이마다 따로 기억');
+  const empty = await deckSandbox({ store, fetchImpl: okJson([]) }).Deck.load({ grade: '5-2', unit: 'L11' });
+  assert.deepEqual([empty.deck, empty.from], [null, 'notion']);
+  assert.equal(store['classcard_deck_v1_son_5-2_L11'], undefined, '부모가 다 끄면 옛 기억으로 열지 않음');
+  const bad = await deckSandbox({ store, fetchImpl: async () => ({ ok: false, status: 500 }) }).Deck.load({ grade: '5-2', unit: 'L11' });
+  assert.equal(bad.from, 'none');
+});
+
+test('단원 목록: 아이가 볼 「사용」 카드가 4장 이상인 단원만, 민서 5학년 미리보기면 민수 단원도', async () => {
+  const small = { grade: '5-2', unit: 'L12', student: '민수', cards: [1, 2, 3].map(no => ({ no, section: 1, en: 'a' + no, ko: 'b' })) };
+  const pages = seedPages().concat(seedPages(small));
+  const son = await deckSandbox({ store: { currentUser: 'son' }, fetchImpl: okJson(pages) }).Deck.listUnits();
+  assert.deepEqual(plain(son), [{ grade: '5-2', unit: 'L11' }]);
+  const t = deckSandbox({ store: { currentUser: 'daughter' }, fetchImpl: okJson(pages) });
+  assert.deepEqual(plain(await t.Deck.listUnits()), []);
+  assert.equal(t.calls[0].url, 'https://proxy.test/v1/databases/cc-db/query', '목록은 엣지 캐시 그대로');
+  const preview = await deckSandbox({ store: { currentUser: 'daughter', english_upper_preview_daughter: '1' }, fetchImpl: okJson(pages) }).Deck.listUnits();
+  assert.equal(preview.length, 1);
+  const store = { currentUser: 'son' };
+  await deckSandbox({ store, fetchImpl: okJson(pages) }).Deck.listUnits();
+  const offline = await deckSandbox({ store, fetchImpl: async () => { throw new Error('x'); } }).Deck.listUnits();
+  assert.equal(offline.length, 1, '통신이 안 되면 기억한 목록');
+});
+
+test('별표: 노션에서 끈 카드의 별표는 지우지 않고 두었다가 다시 켜면 돌아온다', () => {
+  const store = {};
+  const ctx = sandbox();
+  ctx.localStorage = { getItem: k => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); } };
+  const { state } = ctx.EnglishClasscard;
+  const full = ctx.CLASSCARD_DECK;
+  state.deck = full;
+  state.load();
+  state.toggleBookmark(1);
+  state.toggleBookmark(20);
+  state.deck = { ...full, items: full.items.filter(i => i.id !== 1) };  // 부모가 1번을 끔
+  state.load();
+  assert.deepEqual([...state.bookmarks], [20]);
+  state.save();
+  state.deck = full;  // 다시 켬
+  state.load();
+  assert.deepEqual([...state.bookmarks].sort((a, b) => a - b), [1, 20]);
+});
+
+test('진입·영어방: 등록표에 카드 묶음 파일이 없고, 영어방은 노션 단원 목록으로 🃏 칸을 띄운다', () => {
   const ctx = { window: {} };
   vm.createContext(ctx);
   vm.runInContext(read('kids/subjects/english/data/english_unit_activities.js'), ctx);
   const list = ctx.window.ENGLISH_UNIT_ACTIVITIES;
-  const cc = list.find(a => a.grade === '5-2' && a.unit === 'L11' && a.deck);
-  assert.ok(cc, '클래스카드 등록');
-  assert.equal(cc.href, 'classcard.html');
-  assert.ok(exists(`kids/subjects/english/${cc.deck}`), cc.deck);
-  assert.ok(exists('kids/subjects/english/classcard.html'));
-  // listen_place.html은 학기·단원이 같은 첫 항목을 쓰므로 길 찾기 항목이 먼저 와야 한다
-  const first = list.find(a => a.grade === '5-2' && a.unit === 'L11');
-  assert.equal(first.href, 'listen_place.html');
+  assert.ok(!list.some(a => a.deck || a.href === 'classcard.html'), '클래스카드는 노션이 원본');
+  assert.equal(exists('kids/subjects/english/data/classcard_5-2_L11.js'), false, '옛 정적 묶음 삭제');
+  // listen_place.html은 학기·단원이 같은 첫 항목을 쓴다 — 길 찾기는 그대로
+  assert.equal(list.find(a => a.grade === '5-2' && a.unit === 'L11').href, 'listen_place.html');
+  assert.match(read('kids/subjects/english/classcard.html'), /EnglishClasscard\.Deck\.load\(/);
+  assert.match(read('kids/config.js'), /CLASSCARD_DB_ID: "426a27115b6880c38712d98cf367adb4"/);
+  const eng = read('kids/subjects/english/english.html');
+  const at = eng.indexOf('/english_classcard_deck.js');
+  assert.ok(at > 0 && at < eng.indexOf('/english_unit_bar.js'), '영어방이 단원 칩 바보다 먼저 싣기');
 });
 
 // 화면(english_classcard_grid.js)과 같은 방식으로 판을 돌린다: 맞출 짝 하나를 골라 맞히고, 칸마다 짝 없이 지난 횟수를 센다
@@ -201,7 +322,7 @@ test('철자 조각: 이어 붙이면 원래 낱말, 기호 문장은 철자 문
 test('공부방 규칙: 보기 섞기 부품·음성 엔진만 쓰고 브라우저 음성을 직접 부르지 않는다', () => {
   const cards = read('kids/js/english_classcard_cards.js');
   assert.match(cards, /QuizChoices\.arrange/);
-  for (const f of ['kids/js/english_classcard.js', 'kids/js/english_classcard_grid.js', 'kids/js/english_classcard_cards.js']) {
+  for (const f of ['kids/js/english_classcard.js', 'kids/js/english_classcard_grid.js', 'kids/js/english_classcard_cards.js', DECK_FILE]) {
     assert.doesNotMatch(read(f), /speechSynthesis/, f);
   }
   const main = read('kids/js/english_classcard.js');
@@ -210,8 +331,65 @@ test('공부방 규칙: 보기 섞기 부품·음성 엔진만 쓰고 브라우�
   }
   const html = read('kids/subjects/english/classcard.html');
   assert.doesNotMatch(html, /(src|href)="\/kids-school/, '상대 경로만');
-  const order = ['fairy-config.js', 'fairy-tts.js', 'fairy-engine.js', 'english_classcard.js', 'english_classcard_grid.js', 'english_classcard_cards.js']
+  const order = ['fairy-config.js', 'fairy-tts.js', 'fairy-engine.js', 'english_classcard.js', 'english_classcard_grid.js', 'english_classcard_cards.js', 'english_classcard_deck.js']
     .map(n => html.indexOf('/' + n));
   assert.ok(order.every(p => p > 0));
   assert.deepEqual(order, [...order].sort((a, b) => a - b), '싣는 순서');
+});
+
+test('단원 목록: 뜻이 빈 행 때문에 4장이 안 되는 단원은 칸을 띄우지 않는다 (묶음과 같은 기준)', async () => {
+  const pages = seedPages({
+    grade: '5-2',
+    unit: 'L12',
+    student: '민수',
+    cards: [1, 2, 3, 4].map(no => ({ no, section: 1, en: 'a' + no, ko: 'b' }))
+  });
+  pages[0].properties.뜻 = { rich_text: [] };
+  const { Deck } = deckSandbox({ fetchImpl: okJson(pages) });
+  const res = await Deck.listUnits();
+  assert.deepEqual(plain(res.units ?? res), []);
+});
+
+test('기기 기억: 민서 5학년 미리보기 켬/끔은 서로 다른 키에 기억한다', async () => {
+  const store = { currentUser: 'daughter', english_upper_preview_daughter: '1' };
+  const { Deck } = deckSandbox({ store, fetchImpl: okJson(seedPages()) });
+  await Deck.load({ grade: '5-2', unit: 'L11' });
+  assert.ok(store['classcard_deck_v1_daughter_preview_5-2_L11']);
+
+  delete store.english_upper_preview_daughter;
+  const { Deck: DeckNoPreview } = deckSandbox({
+    store,
+    fetchImpl: async () => { throw new Error('network error'); }
+  });
+  const res = await DeckNoPreview.load('5-2', 'L11');
+  assert.equal(res.from, 'none');
+});
+
+test('노션 조회: 쪽마다 시간제한(AbortSignal)을 따로 건다', async () => {
+  const all = seedPages();
+  const signals = [];
+  let page = 0;
+  const { Deck } = deckSandbox({
+    store: { currentUser: 'son' },
+    fetchImpl: async (_url, opt) => {
+      signals.push(opt.signal);
+      page += 1;
+      if (page === 1) {
+        return {
+          ok: true,
+          json: async () => ({ results: all.slice(0, 20), has_more: true, next_cursor: 'c2' })
+        };
+      }
+      return {
+        ok: true,
+        json: async () => ({ results: all.slice(20), has_more: false })
+      };
+    }
+  });
+  const res = await Deck.load({ grade: '5-2', unit: 'L11' });
+  assert.equal(signals.length, 2);
+  assert.ok(signals[0]);
+  assert.ok(signals[1]);
+  assert.notStrictEqual(signals[0], signals[1]);
+  assert.equal(res.deck.items.length, 34);
 });

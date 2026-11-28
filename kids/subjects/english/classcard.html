@@ -164,7 +164,7 @@
   </div>
 
   <!-- 1. 공통 코어 (english.html과 같은 순서). quiz-flow-controller(QuizChoices)·screentime-tracker는 core.js가 싣는다 -->
-  <script src="../../config.js?v=7e621b5d"></script>
+  <script src="../../config.js?v=3cd4df17"></script>
   <script src="../../core/core.js?v=bc588394"></script>
   <script src="../../core/notion-helper.js?v=e6a50a7a"></script>
   <script src="../../core/fairy-config.js?v=556cfe19"></script>
@@ -173,20 +173,21 @@
   <script src="../../core/fairy-settings-engine.js?v=a5b6e4c7"></script>
   <script src="../../core/fairy-engine.js?v=f5ff3e27"></script>
 
-  <!-- 2. 단원 활동 등록표 + 클래스카드 엔진 -->
-  <script src="data/english_unit_activities.js?v=60efe663"></script>
-  <script src="../../js/english_classcard.js?v=c89061c5"></script>
+  <!-- 2. 클래스카드 엔진 + 카드 묶음 불러오기(노션 「클래스카드 DB」) -->
+  <script src="../../js/english_classcard.js?v=93e57cb7"></script>
   <script src="../../js/english_qwerty.js?v=abe1f16f"></script>
   <script src="../../js/english_classcard_grid.js?v=53523cb0"></script>
   <script src="../../js/english_classcard_cards.js?v=aaff77f1"></script>
+  <script src="../../js/english_classcard_deck.js?v=bbd6b0e6"></script>
 
-  <!-- 3. 진입: ?grade=&unit= 으로 등록표의 카드 묶음(deck) 파일을 불러 시작 -->
+  <!-- 3. 진입: ?grade=&unit= 단원의 「사용」 카드만 노션에서 받아 시작 (통신이 안 되면 기기에 기억한 마지막 묶음) -->
   <script>
     (function () {
       'use strict';
       window.currentSubject = '영어';
 
       function fail(title, desc) {
+        document.getElementById('cc-source').textContent = '';
         var body = document.querySelector('#cc-lobby .cc-lobby-body');
         body.innerHTML = '<div class="cc-panel cc-fail"><div class="cc-fail-emoji">🚧</div><h3></h3><p></p>' +
           '<a href="english.html" class="cc-btn cc-btn-green">영어방으로 돌아가기</a></div>';
@@ -194,22 +195,25 @@
         body.querySelector('p').textContent = desc;
       }
 
-      document.addEventListener('DOMContentLoaded', function () {
+      document.addEventListener('DOMContentLoaded', async function () {
         var params = new URLSearchParams(window.location.search);
         var grade = params.get('grade') || '5-2';
         var unit = params.get('unit') || 'L11';
-        var list = window.ENGLISH_UNIT_ACTIVITIES || [];
-        var act = list.find(function (a) { return a.grade === grade && a.unit === unit && a.deck; });
-        if (!act) { fail('준비 중인 단원이에요', grade + ' ' + unit + ' 클래스카드는 아직 등록되지 않았어요.'); return; }
-
-        var s = document.createElement('script');
-        s.src = act.deck + '?v=20261122-cc';
-        s.onload = function () {
-          try { window.EnglishClasscard.init(window.CLASSCARD_DECK); }
-          catch (e) { console.error('[classcard]', e); fail('카드를 펼치지 못했어요', '카드 묶음 파일을 확인해 주세요.'); }
-        };
-        s.onerror = function () { fail('카드를 불러오지 못했어요', '인터넷 연결을 확인해 주세요.'); };
-        document.body.appendChild(s);
+        var source = document.getElementById('cc-source');
+        source.textContent = '카드를 불러오는 중…';
+        var got = await window.EnglishClasscard.Deck.load({ grade: grade, unit: unit });
+        if (!got.deck) {
+          if (got.from === 'none') fail('카드를 불러오지 못했어요', '인터넷 연결을 확인하고 다시 열어 주세요.');
+          else fail('준비 중인 단원이에요', grade + ' ' + unit + ' 클래스카드는 아직 준비되지 않았어요.');
+          return;
+        }
+        try {
+          window.EnglishClasscard.init(got.deck);
+          if (got.from === 'cache') source.textContent += ' · 인터넷이 안 돼서 기억한 카드로 열었어요';
+        } catch (e) {
+          console.error('[classcard]', e);
+          fail('카드를 펼치지 못했어요', '노션 클래스카드 DB의 카드를 확인해 주세요.');
+        }
       });
     })();
   </script>

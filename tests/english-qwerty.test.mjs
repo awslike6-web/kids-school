@@ -7,6 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { installSeedDeck } from './classcard-seed.mjs';
 
 const base = new URL('../', import.meta.url);
 const read = rel => readFileSync(new URL(rel, base), 'utf8');
@@ -164,7 +165,8 @@ test('입력기: 위치 안내 — 항상 켜기는 다음 키 표시, 막히면
 });
 
 test('타이핑 비중: 블럭 전체 0자리 · 마무리 마지막 1~2자리 · 전체 타이핑은 철자 자리 전부', () => {
-  const ctx = load({ files: ['kids/subjects/english/data/classcard_5-2_L11.js', 'kids/js/english_classcard.js', 'kids/js/english_qwerty.js', 'kids/js/english_classcard_cards.js'] });
+  const ctx = load({ files: ['kids/js/english_classcard.js', 'kids/js/english_qwerty.js', 'kids/js/english_classcard_cards.js'] });
+  installSeedDeck(ctx);
   const { Cards } = ctx.EnglishClasscard;
   const pos = (n, m) => [...Cards.typingPositions(n, m)].join(',');
   assert.equal(pos(10, 'tiles'), '');

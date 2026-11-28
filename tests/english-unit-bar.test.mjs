@@ -15,7 +15,7 @@ const RECORDS = [
 
 const plain = (v) => JSON.parse(JSON.stringify(v));
 
-function load({ profile = 'son', saved, activities = [], fetchVoca = async () => RECORDS } = {}) {
+function load({ profile = 'son', saved, activities = [], fetchVoca = async () => RECORDS, classcardUnits = null } = {}) {
   const store = { currentUser: profile };
   if (saved) store[`english_unit_pick_${profile}`] = JSON.stringify(saved);
   const box = { innerHTML: '' };
@@ -31,6 +31,7 @@ function load({ profile = 'son', saved, activities = [], fetchVoca = async () =>
     selectDynamicGradeUnit: (g, u) => calls.push(['gradeUnit', g, u]),
     selectDynamicGrade: (g) => calls.push(['grade', g]),
   };
+  if (classcardUnits) sandbox.EnglishClasscard = { Deck: { listUnits: async () => classcardUnits } };
   sandbox.window = sandbox;
   vm.createContext(sandbox);
   for (const file of ['kids/subjects/english/data/english_unit_activities.js', 'kids/core/unit_chip_bar.js', 'kids/js/english_unit_bar.js']) {
@@ -106,6 +107,19 @@ test('특별 활동 칸은 등록된 학기·단원을 골랐을 때만 보이�
   assert.match(t.box.innerHTML, /이번 단원 특별 활동/);
   assert.match(t.box.innerHTML, /href="listen_place\.html\?grade=5-2&amp;unit=L8"/);
   assert.match(t.box.innerHTML, /&lt;b&gt;설명&lt;\/b&gt;/);
+});
+
+test('🃏 클래스카드는 등록표 없이 노션 단원 목록(Deck.listUnits)에 있는 단원에만 뜬다', async () => {
+  const t = load({ saved: { grade: '5-2', unit: 'L9' }, classcardUnits: [{ grade: '5-2', unit: 'L9' }] });
+  await t.bar.init();
+  await new Promise(r => setTimeout(r, 0));  // 목록은 비동기로 와서 칸만 다시 그린다
+  assert.match(t.box.innerHTML, /클래스카드 연습/);
+  assert.match(t.box.innerHTML, /href="classcard\.html\?grade=5-2&amp;unit=L9"/);
+  t.bar.selectUnit(t.bar._state().units.indexOf('L8'));
+  assert.doesNotMatch(t.box.innerHTML, /클래스카드 연습/);
+  const none = load({ saved: { grade: '5-2', unit: 'L9' } });  // Deck 모듈이 없는 화면에서도 깨지지 않음
+  await none.bar.init();
+  assert.doesNotMatch(none.box.innerHTML, /클래스카드/);
 });
 
 test('민서(daughter)는 기본에서 5-2를 숨기고, 5학년 미리보기를 켜면 민수 5-2 단원을 합류시킨다', async () => {

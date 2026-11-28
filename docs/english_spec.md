@@ -83,12 +83,13 @@ graph TD
   - **확장성**: 9단원 방에 가구 놓기(`room`), 11단원 지도에서 길 찾기(`map`)로 장면만 갈아 끼워 확장 가능.
   - 명세: [`docs/english_listen_place_spec.md`](english_listen_place_spec.md), [`docs/english_listen_place_L10_spec.md`](english_listen_place_L10_spec.md), [`docs/english_listen_place_L11_spec.md`](english_listen_place_L11_spec.md).
 
-## 2-3. 🃏 클래스카드 연습 (2026-11-22)
+## 2-3. 🃏 클래스카드 연습 (2026-11-22, 카드 노션 이관 2026-11-28)
 
 담임 클래스카드 앱은 **1단계 매칭(2×4 짝맞추기)에서 1,500점을 넘어야 2단계 테스트(카드 넘기기)** 이 열리는데, 시간제한 때문에 아이가 힘들어한다. 같은 구조를 공부방에 두고 시간제한만 고를 수 있게 해서 익숙해지게 한다. 원형은 사용자가 제미나이와 만든 프로토타입(단일 HTML 3,000줄)이고, 공부방 규칙에 맞게 다시 짰다.
 
-- **주소**: `kids/subjects/english/classcard.html?grade=5-2&unit=L11`. 영어방 단원 칩에서 5-2 · 11단원을 고르면 「이번 단원 특별 활동」에 🃏 카드가 뜬다(`english_unit_activities.js`의 `deck` 칸이 있는 항목).
-- **카드 묶음 = 클래스카드 글자 그대로**: `kids/subjects/english/data/classcard_<학년>_L<단원>.js`(`window.CLASSCARD_DECK`). VOCA_DB 단원 어휘(교과·클래스카드 뜻 병기, 11단원 60행)를 쓰지 않는다. 아이가 실제 시험에서 보는 단어·뜻만 보여 줘야 덜 헷갈린다(2026-11-22 사용자 결정). 뜻도 고치지 않는다: `go straight` = 「성실히 살다, 갱생하다」, `turn left` = 「왼편을 향하다」(선생님이 고치기 전까지). `{2}`·`/`·`~` 같은 클래스카드 표기는 화면에 그대로 두고, 읽을 글자만 `say` 칸에 따로 적는다(자연어를 잘라 해석하지 않음).
+- **주소**: `kids/subjects/english/classcard.html?grade=5-2&unit=L11`. 영어방 단원 칩에서 5-2 · 11단원을 고르면 「이번 단원 특별 활동」에 🃏 카드가 뜬다. 등록표(`english_unit_activities.js`)에는 적지 않고, `english_unit_bar.js`가 `EnglishClasscard.Deck.listUnits()`로 노션 「클래스카드 DB」에 지금 아이가 쓸 「사용」 카드로 묶음을 만들 수 있는 단원(연습 화면 `buildDeck`과 같은 기준: 뜻·구간이 있는 카드 4장 이상)을 받아 띄운다(엣지 캐시 5분, 통신이 안 되면 기기에 기억한 목록 `classcard_units_v1_{son|daughter}`, 2026-11-28 사용자 선택 「노션 보고 자동 표시」).
+- **카드 묶음 = 노션 「클래스카드 DB」 (2026-11-28~)**: 칸은 영어·뜻·읽기·학년·단원·학생·구간·순번·카드번호·사용(`docs/notion_schemas_school.md` 「클래스카드 DB」, `APP_CONFIG.CLASSCARD_DB_ID`). 화면은 `kids/js/english_classcard_deck.js`(`EnglishClasscard.Deck.load`)가 열 때마다 노션을 `?force=true`로 새로 읽어 **「사용」이 켜진 카드만** 엔진 계약 `{id: 카드번호, section: 구간, en: 영어, ko: 뜻, say: 읽기}`으로 넘긴다. 구간 안 순서는 순번, 사용 카드가 없는 구간은 로비에서 숨긴다. 학생 칸은 지금 아이 또는 「공통」 카드만 보인다(민서가 영어방 「5학년 미리보기」를 켰으면 민수 카드도). 그래서 민서로 5-2 L11을 열면 「준비 중」이다(2026-11-28 승인). 노션 통신이 안 되면 아이·단원별로 기기에 기억한 마지막 묶음(`classcard_deck_v1_{son|daughter}_{학년}_{단원}`, 민서 5학년 미리보기를 켠 상태는 `daughter_preview`로 따로)으로 열고 로비에 「기억한 카드로 열었어요」를 붙인다. 노션에 사용 카드가 4장보다 적으면 기억을 지우고 「준비 중」. **카드번호는 별표·문항기록 키(`s:cc-<학년>-<단원>:<번호>`)라 바꾸지 않는다**. 부모가 카드를 끄면 그 카드의 별표는 `state.hiddenBookmarks`로 남겨 다시 켜면 돌아온다. 예전 정적 파일 `data/classcard_5-2_L11.js`는 지웠고 같은 카드번호로 옮겼다(민수 별표·기록 유지).
+- **클래스카드 글자 그대로**: VOCA_DB 단원 어휘(교과·클래스카드 뜻 병기, 11단원 60행)를 쓰지 않는다. 아이가 실제 시험에서 보는 단어·뜻만 보여 줘야 덜 헷갈린다(2026-11-22 사용자 결정). 뜻도 고치지 않는다: `go straight` = 「성실히 살다, 갱생하다」, `turn left` = 「왼편을 향하다」(선생님이 고치기 전까지). `{2}`·`/`·`~` 같은 클래스카드 표기는 화면에 그대로 두고, 읽을 글자만 「읽기」 칸(`say`)에 따로 적는다(자연어를 잘라 해석하지 않음).
 - **흐름**: 로비(구간·시간제한·안심 모드·영어 속도) → 1단계 매칭 → 1,500점 안내창 → 2단계 테스트 10장 → 결과(다시 볼 카드·별표 카드).
 - **1단계 매칭** (`kids/js/english_classcard_grid.js`, `EnglishClasscard.Grid`): 왼쪽 영어 4칸·오른쪽 뜻 4칸. 맞힌 두 칸만 바뀐다. **실제 클래스카드처럼 판 위에 맞는 짝은 보통 1쌍, 가끔 2쌍(20%)** 이고 나머지 카드는 짝이 없다(2026-11-23 사용자 확인). 0쌍 판은 없고, 짝 없이 4번 넘게 남은 카드는 다음 채우기 때 짝을 넣어 준다(재 보면 한 카드가 짝 없이 보통 7~9번 안에 짝을 만난다). 카드가 7장보다 적은 작은 구간은 짝이 더 생길 수 있다. 판 계산 `Grid.logic`은 DOM 없이 시험. 점수 50 · 2연속 80 · 4연속 100 · 소리 카드 100. **영어 발음은 맞혔을 때만** 나온다(카드를 누르거나 틀렸을 때는 읽지 않음, 실전 모드 소리 카드만 눌러서 듣기).
 - **시간제한**: 없음(기본) · 천천히 3분 30초 · 기본 2분. 안심 모드에서는 마지막 30초에 색만 바뀌고 「Hurry UP」은 나오지 않는다.
@@ -103,8 +104,13 @@ graph TD
 - **잠금**: 1,500점을 한 번 넘으면 그 단원 2단계는 계속 열린다(실제 앱과 같음). 부모 로그인(아빠·엄마·어른)에서만 「2단계 미리보기 열기」·「기록 지우기」가 보인다. 기록은 아이·단원마다 기기에 `classcard_v1_{son|daughter}_{학년}_{단원}`.
 - **소리**: 영어는 `speakEnglish`(영어방 속도 설정 0.75·0.85·1.0을 함께 씀). 매칭(짝맞추기)은 빨리 이어지므로 짧은 효과음 + 발음만, 테스트는 정답 `fairyPraise` · 오답 `fairyEncourage` · 완주 `fairyReward`(보상 세션). 1,500점 통과 때 `fairyReward('quest')`.
 - **보상·기록**: 1,500점 첫 통과는 하루 한 번 💎3 + 학습일지(`claimMissionRewardOnce`). 테스트는 공통 퀴즈 보상 세션(2문제마다 1개, 완주 +5, 학습일지 한 번, 중간에 나가도 일지). 문항기록 키는 `s:cc-<학년>-<단원>:<카드 id>`(정적 자료 접두어, `docs/learning_record_spec.md` §5).
-- **새 단원 추가**: 담임 클래스카드를 보고 `data/classcard_<학년>_L<단원>.js`를 만들고(카드 id는 한 번 정하면 바꾸지 않음), `english_unit_activities.js`에 `{ grade, unit, title: '클래스카드 연습', icon: '🃏', href: 'classcard.html', deck: 'data/classcard_….js' }` 한 줄. 엔진은 고치지 않는다. 등록표에서 같은 단원의 `listen_place` 항목보다 뒤에 둔다(`listen_place.html`이 같은 단원의 첫 항목을 씀).
-- **시험**: `tests/english-classcard.test.mjs` (카드 묶음 글자·판 짝 1~2쌍과 오래 남은 카드 무작위 1만 회·작은 구간·맞혔을 때만 발음·점수·문제 만들기·철자 조각·음성/보기 섞기 규칙·싣는 순서), `tests/english-qwerty.test.mjs` (글자 칸 건너뜀·띄어쓰기 다듬기, 가짜 DOM으로 입력기 오타·완료 한 번·지우기·물리 키보드·위치 안내 3종·정리, 타이핑 비중 자리 계산).
+- **새 단원·카드 추가 (공식 도구)**: 담임 클래스카드를 보고 `scripts/data/classcard/english_<학년>_<단원>.json`(형식은 도구 맨 위 설명, 예 `english_5-2_L11.json`)을 만들고
+  `python -X utf8 scripts/register_classcard.py --file scripts/data/classcard/english_5-2_L12.json` → 미리보기 확인 → `--apply`(없는 행만). 코드·등록표는 고치지 않는다(노션 행만 있으면 영어방 칸과 연습 화면이 생긴다). 노션에 직접 행을 넣어도 된다(학년·단원 선택지, 카드번호는 그 단원 안에서 하나만).
+  - 같은 행 = 학년·단원·카드번호. `--apply`는 기존 행을 덮지 않고 바뀔 칸만 보여 준다(폰 노션에서 고친 글자 보존). `--update`는 글자·구간·순번도 자료대로 덮는다.
+  - 「사용」은 행을 처음 만들 때만 자료 값(`use`, 기본 켬)으로 쓰고 그 뒤로는 덮지 않는다. 부모가 폰 노션에서 켜고 끈다. 도구로는 `--set-use on --cards 35-44`(적은 카드만).
+  - 노션에만 있는 행은 알려 주기만 하고 지우지 않는다.
+- **11단원 4구간 (2026-11-28)**: 담임 선생님이 알려 준 문장 10개(35~44번, `Where is the restaurant?` … `It is next to the rocks.`)를 4구간으로 넣었다(사용자 선택: 4구간 하나). 선생님 클래스카드에 아직 안 올라와서 **사용 끔**으로 등록했다. 올라오면 폰 노션에서 「사용」을 체크하거나 `register_classcard.py --file scripts/data/classcard/english_5-2_L11.json --set-use on --cards 35-44`.
+- **시험**: `scripts/test_register_classcard.py`(가짜 통신: 미리보기는 안 씀·새 행만·사용 칸은 처음만·`--set-use`·노션에만 있는 행·자료 L11 44장), `tests/english-unit-bar.test.mjs`(🃏 칸은 노션 단원 목록에 있을 때만), `tests/english-classcard.test.mjs` (등록 자료 → 노션 행 모양 → 실제 `Deck.buildDeck`(`tests/classcard-seed.mjs`)으로 만든 묶음: 사용 끈 카드·빈 구간 숨김·아이별 거르기·순번·`load`의 `?force=true`/기기 기억/준비 중·`listUnits`·끈 카드 별표 보존, 카드 묶음 글자·판 짝 1~2쌍과 오래 남은 카드 무작위 1만 회·작은 구간·맞혔을 때만 발음·점수·문제 만들기·철자 조각·음성/보기 섞기 규칙·싣는 순서), `tests/english-qwerty.test.mjs` (글자 칸 건너뜀·띄어쓰기 다듬기, 가짜 DOM으로 입력기 오타·완료 한 번·지우기·물리 키보드·위치 안내 3종·정리, 타이핑 비중 자리 계산).
 
 ---
 

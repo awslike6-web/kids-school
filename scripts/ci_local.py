@@ -27,6 +27,7 @@ NODE_MISSING = 3  # 종료 코드: node를 못 찾음 (pre-push 훅이 로그에
 PY_UNITTESTS = [
     'scripts/test_register_voca.py',
     'scripts/test_register_curriculum.py',
+    'scripts/test_register_classcard.py',
     'scripts/test_ci_local.py',
     'scripts/test_version_stamp.py',
 ]

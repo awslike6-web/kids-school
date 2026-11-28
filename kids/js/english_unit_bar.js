@@ -53,9 +53,23 @@
         return /^L\d+$/i.test(unit) ? unit.replace(/\D/g, '') + '단원' : unit;
     }
 
+    // 🃏 클래스카드 연습: 노션 「클래스카드 DB」에 지금 아이가 쓸 「사용」 카드가 있는 단원 (EnglishClasscard.Deck.listUnits).
+    // 등록표에 줄을 더하지 않아도 노션 행만으로 단원 칸에 뜬다. 목록이 오면 칸만 다시 그린다.
+    const CLASSCARD_ACTIVITY = { title: '클래스카드 연습', desc: '시간 걱정 없이 테스트 → 매칭을 익혀요', icon: '🃏', href: 'classcard.html' };
+    let classcardUnits = [];
+
+    async function loadClasscardUnits() {
+        const deck = window.EnglishClasscard && window.EnglishClasscard.Deck;
+        if (!deck || typeof deck.listUnits !== 'function') return;
+        try { classcardUnits = (await deck.listUnits()) || []; } catch (e) { classcardUnits = []; }
+        bar.render();
+    }
+
     function activitiesFor(grade, unit) {
         const list = Array.isArray(window.ENGLISH_UNIT_ACTIVITIES) ? window.ENGLISH_UNIT_ACTIVITIES : [];
-        return list.filter(a => a && a.grade === grade && a.unit === unit && a.href);
+        const own = list.filter(a => a && a.grade === grade && a.unit === unit && a.href);
+        const cc = classcardUnits.some(u => u.grade === grade && u.unit === unit) ? [{ ...CLASSCARD_ACTIVITY, grade, unit }] : [];
+        return own.concat(cc);
     }
 
     function activityHref(a) {
@@ -96,11 +110,12 @@
         try { localStorage.setItem(PREVIEW_KEY, next ? '1' : '0'); } catch (e) { /* 저장 불가 시 무시 */ }
         if (!next && bar.getPick().grade.startsWith('5-')) bar.selectGrade(-1);
         await bar.init();
+        loadClasscardUnits();  // 민서 미리보기를 켜고 끄면 보이는 단원이 달라진다
         return next;
     }
 
     window.EnglishUnitBar = {
-        init: bar.init,
+        init: async () => { const done = bar.init(); loadClasscardUnits(); return done; },
         render: bar.render,
         selectGrade: bar.selectGrade,
         selectUnit: bar.selectUnit,

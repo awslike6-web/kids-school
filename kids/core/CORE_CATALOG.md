@@ -1000,7 +1000,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 영어방은 6단계 사다리(활동 순서)가 뼈대이고, 이 바에서 학기·단원을 먼저 고르면 2~4단계가 단원 선택 화면 없이 그 단원으로 바로 시작합니다. 과학방처럼 단원별 구역으로 나누지 않는 이유: 영어 단원은 활동 종류가 같고 내용(클래스 카드 단어·문장)만 바뀌기 때문입니다.
 - **파일 위치**: `kids/js/english_unit_bar.js` (칩 바 자체는 공통 `kids/core/unit_chip_bar.js`) · 등록표 `kids/subjects/english/data/english_unit_activities.js` (`window.ENGLISH_UNIT_ACTIVITIES`)
 - **데이터**: 학기·단원 칩은 `fetchVocaFromNotion({subject:'영어'})`의 `grades`·`level` 원문으로 만든다(표시만 `L8`→`8단원`). 고른 값은 이 기기에만 아이별로 기억한다(`english_unit_pick_{son|daughter}`).
-- **특별 활동 등록**: 그 단원에만 맞는 활동이 있을 때만 등록표에 `{grade, unit, icon, title, desc, href}` 한 줄을 넣는다. 화면이 `href?grade=&unit=`으로 붙여 연다. 등록 기준은 ① 그 단원 클래스 카드 핵심 문장을 그대로 연습 ② 데이터만 바꿔 두 단원 이상에 쓰는 엔진.
+- **특별 활동 등록**: 그 단원에만 맞는 활동이 있을 때만 등록표에 `{grade, unit, icon, title, desc, href}` 한 줄을 넣는다. 단, 🃏 클래스카드 연습은 등록표에 적지 않는다 — `EnglishClasscard.Deck.listUnits()`(영어방이 `english_classcard_deck.js`를 칩 바보다 먼저 싣는다)가 노션 「클래스카드 DB」에 사용 카드가 있는 단원을 알려 주면 칸만 다시 그린다(2026-11-28). 화면이 `href?grade=&unit=`으로 붙여 연다. 등록 기준은 ① 그 단원 클래스 카드 핵심 문장을 그대로 연습 ② 데이터만 바꿔 두 단원 이상에 쓰는 엔진.
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
@@ -1061,14 +1061,15 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 - **검증**: `tests/english-listen-place.test.mjs`
 
 ### 🃏 `english_classcard*.js` (영어 클래스카드 연습: 매칭 2×4 짝맞추기 → 1,500점 → 카드 넘기기 테스트, 2026-11-22~)
-담임 클래스카드 시험 구조를 그대로 연습하는 특별 활동. 시간제한(없음·천천히·기본)과 안심 모드만 다르다. 카드 묶음은 클래스카드 글자 그대로의 정적 자료(VOCA_DB 아님). 명세 `docs/english_spec.md` §2-3.
-- **파일 위치**: 화면 `kids/subjects/english/classcard.html?grade=&unit=` · CSS `kids/css/english_classcard.css` · 카드 묶음 `kids/subjects/english/data/classcard_<학년>_L<단원>.js`(첫 묶음 `kids/subjects/english/data/classcard_5-2_L11.js`)(`window.CLASSCARD_DECK`, `english_unit_activities.js`의 `deck` 칸으로 연결)
+담임 클래스카드 시험 구조를 그대로 연습하는 특별 활동. 시간제한(없음·천천히·기본)과 안심 모드만 다르다. 카드 묶음은 노션 「클래스카드 DB」(클래스카드 글자 그대로, VOCA_DB 아님, 2026-11-28~)에서 받는다. 명세 `docs/english_spec.md` §2-3.
+- **파일 위치**: 화면 `kids/subjects/english/classcard.html?grade=&unit=` · CSS `kids/css/english_classcard.css` · 카드 원본 노션 「클래스카드 DB」(`APP_CONFIG.CLASSCARD_DB_ID`, 칸은 `docs/notion_schemas_school.md`) · 등록 `scripts/register_classcard.py` + `scripts/data/classcard/english_<학년>_<단원>.json`
   - `kids/js/english_classcard.js` (약 390줄, `window.EnglishClasscard`): 저장 상태(`state`, 아이·단원별 기기 저장), 소리(`sound`: `speakEnglish`·`fairyPraise/Encourage/Reward`·짧은 효과음), 보상 연결(`reward`: `claimMissionRewardOnce`·퀴즈 보상 세션·`LearningLog.question`), 로비·결과·안내창
   - `kids/js/english_classcard_grid.js` (약 320줄, `EnglishClasscard.Grid`): 1단계 매칭(짝맞추기) 화면 + 판 계산 `Grid.logic`(`initialBoard`·`refillPair(…, {leftAge, rightAge})`·`countValidPairs`·`pointsFor`, DOM 없음). 판의 짝은 실제 앱처럼 보통 1쌍·가끔 2쌍, 짝 없이 오래 남은 카드는 짝을 넣어 줌. 영어 발음은 맞혔을 때만
   - `kids/js/english_classcard_cards.js` (약 410줄, `EnglishClasscard.Cards`): 2단계 테스트(카드 퀴즈, `buildQuestions`·`tokenize`·`isSpellable`), 6지선다는 `QuizChoices.arrange`, 철자 글자 조각/직접 입력, 밀기
+  - `kids/js/english_classcard_deck.js` (약 200줄, `EnglishClasscard.Deck`): 카드 묶음 불러오기. `load({grade, unit})` → `{deck, from: 'notion'|'cache'|'none'}`(노션 `?force=true`, 「사용」 카드만, 실패하면 아이·단원별 기기 기억 `classcard_deck_v1_{son|daughter[_preview]}_{학년}_{단원}`, 노션 조회는 쪽마다 6초 시간제한), `listUnits()` → 영어방 🃏 칸에 띄울 `[{grade, unit}]`(엣지 캐시, 단원마다 `buildDeck`이 묶음을 만들 수 있을 때만), `buildDeck(rows, {grade, unit, students})`·`parsePage(page)`(DOM·통신 없음, 빈 구간 숨김·순번 정렬·카드번호 중복 하나만). 학생 칸은 지금 아이·공통(민서 5학년 미리보기면 민수도)
   - 2단계 철자 타이핑 비중(블럭 전체·마무리 타이핑·전체 타이핑)과 자판 위치 안내(항상·막히면 반짝·끄기)는 로비 설정(`state.spellTyping`·`state.keyGuide`). 타이핑 문항은 아래 `english_qwerty.js`를 부른다(`Cards.typingPositions`·`isTypable`).
-- **새 단원**: 카드 묶음 파일 하나 + 등록표 한 줄. 엔진은 고치지 않는다.
-- **검증**: `tests/english-classcard.test.mjs`
+- **새 단원**: 자료 JSON 하나를 `register_classcard.py --apply`로 노션에 넣으면 끝(또는 노션에 행을 직접). 영어방 🃏 칸은 `english_unit_bar.js`가 `Deck.listUnits()`로 알아서 띄우고, 등록표·엔진은 고치지 않는다. 노션에서 끈 카드의 별표는 `state.hiddenBookmarks`에 남겨 다시 켜면 돌아온다.
+- **검증**: `tests/english-classcard.test.mjs`(시험 묶음은 `tests/classcard-seed.mjs`가 등록 자료로 만든다), `tests/english-unit-bar.test.mjs`, `scripts/test_register_classcard.py`(가짜 통신)
 
 ### ⌨️ `english_qwerty.js` (폰용 영문 자판 + 글자 칸 입력기, 2026-11-23~)
 폰 OS 키보드 없이 화면 자판으로 영어 철자를 치게 하는 부품. 클래스카드 연습 2단계 타이핑 문항이 첫 사용처이고, 다른 화면에서도 그대로 쓸 수 있다. 초안 hydrogen, 검수·조립 Claude.

@@ -5,6 +5,8 @@
 // - 학기·단원 값은 노션 VOCA_DB의 「학년」·「단원」 원문과 똑같이 쓴다 (예: grade '5-2', unit 'L8').
 // - href는 english.html 기준 상대 경로이고 주소값 없이 쓴다. 단원 칩 바가 ?grade=&unit= 을 붙여 연다.
 // - 등록 기준: ① 그 단원 클래스 카드의 핵심 문장을 그대로 연습한다 ② 데이터만 바꿔 두 단원 이상에 쓸 수 있는 엔진이다.
+// - 🃏 클래스카드 연습은 여기에 적지 않는다. 노션 「클래스카드 DB」에 「사용」 카드가 있는 단원이면 영어방이 알아서 띄운다
+//   (english_unit_bar.js → EnglishClasscard.Deck.listUnits, docs/english_spec.md §2-3).
 // - 활동 화면이 더 필요한 값(예: Listen & Place의 scene 파일 경로)은 같은 항목에 덧붙인다. 단원 칩 바는 모르는 칸을 무시한다.
 
 window.ENGLISH_UNIT_ACTIVITIES = [
@@ -34,14 +36,5 @@ window.ENGLISH_UNIT_ACTIVITIES = [
     icon: '🧭',
     href: 'listen_place.html',
     scene: 'data/listen_place_5-2_L11.js'
-  },
-  {
-    grade: '5-2',
-    unit: 'L11',
-    title: '클래스카드 연습',
-    desc: '시간 걱정 없이 테스트 → 매칭을 익혀요',
-    icon: '🃏',
-    href: 'classcard.html',
-    deck: 'data/classcard_5-2_L11.js'
   }
 ];
